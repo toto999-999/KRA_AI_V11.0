@@ -80,7 +80,6 @@
             display: flex; align-items: center; justify-content: space-between; animation: fadeIn 0.3s ease;
         }
 
-        /* 🎯 [신규] 경마장별 추천 승식 직격 뱃지 바 */
         .bet-strategy-bar {
             background: rgba(0,0,0,0.25); color: #ffd700; padding: 4px 8px; border-radius: 6px;
             font-size: 0.78rem; font-weight: 800; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
@@ -109,8 +108,6 @@
         .ai-tag.purple-tag { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; font-weight: 800; }
         .ai-tag.emerald-tag { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; font-weight: 800; box-shadow: 0 1px 3px rgba(16,185,129,0.2); }
         .ai-tag.warn-tag { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-weight: 800; }
-        
-        /* 👑 2선 프리런 황금전개 전용 반짝 뱃지 */
         .ai-tag.freerun-tag { background: linear-gradient(135deg, #fef08a, #fde047); color: #854d0e; border: 1px solid #facc15; font-weight: 900; box-shadow: 0 1px 4px rgba(234,179,8,0.3); }
 
         .role-badge { font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; }
@@ -197,7 +194,7 @@
                     <button class="btn-lock" onclick="lockApp()" title="화면 잠그기">🔒</button>
                 </div>
             </div>
-            <p id="dateInfo">3대 경마장 특화 분석 엔진 가동 중...</p>
+            <p id="dateInfo">데이터 로딩 중...</p>
         </header>
 
         <div id="updateToast" class="update-toast"></div>
@@ -224,7 +221,6 @@
         </nav>
 
         <div class="container">
-            <!-- [탭 1] 실시간 승부예측 -->
             <div id="tab-pred" class="tab-content active">
                 <div id="specialTargetBar" class="special-target-bar">
                     <span>🔥 AI 엄격선별: 삼복승·복연승 초강력 추천 경주!</span>
@@ -250,7 +246,7 @@
                 <div id="horseList"></div>
             </div>
 
-            <!-- [탭 2] 뱃지 도감 -->
+            <!-- 탭 2: 20종 뱃지도감 -->
             <div id="tab-badges" class="tab-content">
                 <div class="guide-card">
                     <div class="guide-title">🏷️ AI 핵심 뱃지 총람 (V11.00 3대 경마장 특화 모델)</div>
@@ -384,9 +380,8 @@
                 </div>
             </div>
 
-            <!-- [탭 3] 베팅 가이드 (자르지 않은 원본 사진 & 3대 경마장 비법) -->
+            <!-- 탭 3: 베팅 가이드 -->
             <div id="tab-betting" class="tab-content">
-                
                 <div class="guide-card" style="border: 2px solid #e63946;">
                     <div class="guide-title" style="color:#e63946;">
                         📸 [10/5 서울 10R 실전 화면] 자르지 않은 원본 그대로 보기
@@ -395,7 +390,6 @@
                         사용자님께서 직접 분석하신 <strong>10월 5일 서울 10R 실전 복기 전체 화면</strong>입니다. 인기 1위마의 침몰과 3착 복병마의 우승을 한눈에 대조해 보세요!
                     </div>
 
-                    <!-- 📸 자르지 않은 원본 사진 뷰어 -->
                     <div class="full-screenshot-box">
                         <img src="./case_study_1005.JPG" alt="10/5 서울 10R 실전 복기 원본 화면" class="full-screenshot-img" onerror="this.onerror=null; this.src='./case_study_1005.png';">
                     </div>
@@ -428,7 +422,6 @@
                     </div>
                 </div>
 
-                <!-- 3대 경마장별 맞춤 필승 공식 -->
                 <div class="guide-card" style="border: 2px solid #1e3c72;">
                     <div class="guide-title" style="color:#1e3c72;">
                         🏛️🌊🍊 3대 경마장별 절대 불패 베팅 수칙
@@ -454,7 +447,7 @@
                 </div>
             </div>
 
-            <!-- [탭 4] 입상마 분석실 -->
+            <!-- 탭 4: 입상마 분석실 -->
             <div id="tab-winners" class="tab-content">
                 <div class="guide-card">
                     <div class="guide-title">📊 최근 5주간 실제 1·2·3착 입상마 빅데이터 통계</div>
@@ -490,7 +483,7 @@
         </div>
     </div>
 
-    <!-- 스크립트 로직 (경마장별 동적 테마 & 추천 승식 연동) -->
+    <!-- 스크립트 로직 (마사회 공식 표출 그대로 연동) -->
     <script>
         const CORRECT_PIN = "1415";
 
@@ -566,7 +559,7 @@
         function executeWorkflow(token) {
             const toast = document.getElementById('updateToast');
             toast.style.display = 'block';
-            toast.innerHTML = "🚀 V11.00 3대 경마장 데이터 갱신 중입니다!<br><span style='font-size:0.75rem; color:#ffeaa7;'>(마사회 서버 통신 중)</span>";
+            toast.innerHTML = "🚀 V11.00 데이터 갱신 중입니다!<br><span style='font-size:0.75rem; color:#ffeaa7;'>(마사회 서버 통신 중)</span>";
 
             fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/update.yml/dispatches`, {
                 method: 'POST',
@@ -629,12 +622,9 @@
                             datePrefix = `${m}/${d} `;
                         }
 
-                        let meetIcon = "🏛️";
-                        if (r.meet_name === "제주") meetIcon = "🍊";
-                        else if (r.meet_name === "부산경남" || r.meet_name === "영천") meetIcon = "🌊";
-
+                        // 🎯 [핵심] 마사회에서 올라온 명칭 그대로 표출 (영천이면 영천, 서울이면 서울!)
                         const targetBadge = r.is_trio_target ? "🔥[삼복·복연] " : "";
-                        opt.textContent = `${targetBadge}[${datePrefix}${meetIcon}${r.meet_name}] ${r.race_no}R${dStr}${tStr}`;
+                        opt.textContent = `${targetBadge}[${datePrefix}${r.meet_name}] ${r.race_no}R${dStr}${tStr}`;
                         if (r.is_trio_target) {
                             opt.style.fontWeight = "800";
                             opt.style.color = "#d63031";
@@ -644,7 +634,7 @@
 
                     const latestIdx = data.length > 0 ? (data.length - 1) : 0;
                     select.value = latestIdx;
-                    document.getElementById('dateInfo').textContent = `${data[latestIdx].race_date} AI V11.00 3대 경마장 특화 엔진`;
+                    document.getElementById('dateInfo').textContent = `${data[latestIdx].race_date} AI V11.00 표준 엔진`;
                     
                     buildWinnersAnalytics();
                     renderRace(latestIdx);
@@ -755,7 +745,7 @@
         }
 
         // ========================================================
-        // 🐎 [1번 탭] 전개 포지션 추천 렌더링 (동적 테마 연동!)
+        // 🐎 [1번 탭] 전개 포지션 추천 렌더링
         // ========================================================
         function renderRace(idx) {
             const race = allRaceData[idx];
@@ -774,7 +764,7 @@
 
             distLabel.textContent = `경주 (${race.distance || '1200'}m | ${race.track || '양호'})`;
 
-            // 🎯 [신규] 경마장별 동적 테마 컬러 적용
+            // 마사회 표출별 테마 색상 자동 매핑
             if (race.meet_name === "제주") {
                 headerEl.style.background = "linear-gradient(135deg, #c2410c, #ea580c)";
                 banner.style.background = "linear-gradient(135deg, #ea580c, #f97316)";
