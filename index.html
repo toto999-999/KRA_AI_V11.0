@@ -6,7 +6,7 @@
     <title>KRA전국 승부예상AI_V11.00</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif; }
-        body { background-color: #f4f6f9; color: #333; padding-bottom: 40px; }
+        body { background-color: #f4f6f9; color: #333; padding-bottom: 40px; transition: background 0.3s ease; }
         
         #lockScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -37,7 +37,7 @@
         .pin-err { color: #e63946; font-size: 0.8rem; font-weight: bold; margin-top: 10px; display: none; }
 
         #mainApp { display: none; }
-        header { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 14px 16px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        header { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 14px 16px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: background 0.4s ease; }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
         header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.5px; }
         
@@ -80,6 +80,12 @@
             display: flex; align-items: center; justify-content: space-between; animation: fadeIn 0.3s ease;
         }
 
+        /* 🎯 [신규] 경마장별 추천 승식 직격 뱃지 바 */
+        .bet-strategy-bar {
+            background: rgba(0,0,0,0.25); color: #ffd700; padding: 4px 8px; border-radius: 6px;
+            font-size: 0.78rem; font-weight: 800; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
+        }
+
         .hit-status-tag { font-size: 0.75rem; background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 20px; font-weight: bold; }
 
         .race-select-card { background: white; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -104,6 +110,9 @@
         .ai-tag.emerald-tag { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; font-weight: 800; box-shadow: 0 1px 3px rgba(16,185,129,0.2); }
         .ai-tag.warn-tag { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-weight: 800; }
         
+        /* 👑 2선 프리런 황금전개 전용 반짝 뱃지 */
+        .ai-tag.freerun-tag { background: linear-gradient(135deg, #fef08a, #fde047); color: #854d0e; border: 1px solid #facc15; font-weight: 900; box-shadow: 0 1px 4px rgba(234,179,8,0.3); }
+
         .role-badge { font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; }
         .role-1st { background-color: #ffd700; color: #7a5800; }
         .role-2nd { background-color: #c0c0c0; color: #333; }
@@ -129,6 +138,15 @@
         .badge-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.82rem; }
         .badge-table th { background: #f1f4f9; padding: 8px; text-align: left; color: #1e3c72; border-bottom: 1px solid #ddd; }
         .badge-table td { padding: 8px; border-bottom: 1px solid #eee; }
+
+        .full-screenshot-box {
+            width: 100%; background: #fff; border-radius: 12px; padding: 10px;
+            border: 2px solid #1e3c72; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin: 12px 0 16px 0;
+        }
+        .full-screenshot-img {
+            width: 100%; max-width: 440px; display: block; margin: 0 auto;
+            border-radius: 8px; border: 1px solid #ddd;
+        }
 
         .filter-row { display: flex; gap: 6px; margin-bottom: 14px; }
         .filter-btn { flex: 1; padding: 8px 0; background: white; border: 1px solid #ddd; border-radius: 8px; font-size: 0.78rem; font-weight: bold; color: #666; cursor: pointer; text-align: center; }
@@ -171,7 +189,7 @@
     </div>
 
     <div id="mainApp">
-        <header>
+        <header id="appHeader">
             <div class="header-top">
                 <h1>🐎 KRA전국 승부예상AI_V11.00</h1>
                 <div class="header-btns">
@@ -220,6 +238,7 @@
                     </h2>
                     <div id="aiRecommendation" class="pick-list">-</div>
                     <div id="aiTop3Recommendation" class="pick-sub-list">-</div>
+                    <div id="aiStrategyBar" class="bet-strategy-bar">🎯 추천 승식: 복승식 & 복연승</div>
                     <div id="aiPatternMatchList" class="pick-extra-list">📊 전개 시나리오 분석 중...</div>
                 </div>
 
@@ -231,7 +250,7 @@
                 <div id="horseList"></div>
             </div>
 
-            <!-- [탭 2] 뱃지 도감 (20종 완전체) -->
+            <!-- [탭 2] 뱃지 도감 -->
             <div id="tab-badges" class="tab-content">
                 <div class="guide-card">
                     <div class="guide-title">🏷️ AI 핵심 뱃지 총람 (V11.00 3대 경마장 특화 모델)</div>
@@ -246,6 +265,10 @@
                         </thead>
                         <tbody>
                             <tr>
+                                <td><span class="ai-tag freerun-tag">2선 프리런 황금전개 👑</span></td>
+                                <td><strong>[실전 1착 승부마]</strong> 앞선 인기마들의 몸싸움 뒤에서 모래·바람 저항 없이 체력을 아끼다 쏘아 올리는 황금 전개마 (+8점)</td>
+                            </tr>
+                            <tr>
                                 <td><span class="ai-tag gold-tag">제주 황금인코스 🎯</span></td>
                                 <td><strong>[제주 전용]</strong> 코너가 좁고 급한 제주에서 최단거리로 독주하는 1~3번 게이트 (+8점)</td>
                             </tr>
@@ -256,10 +279,6 @@
                             <tr>
                                 <td><span class="ai-tag gold-tag">부경 직선주로 추입 🚀</span></td>
                                 <td><strong>[부경 전용]</strong> 서울보다 60m 긴 460m 직선주로를 활용해 막판 200m에 역전하는 탄력마 (+12점)</td>
-                            </tr>
-                            <tr>
-                                <td><span class="ai-tag gold-tag">2선 프리런 황금전개 👑</span></td>
-                                <td><strong>[서울 1착 승부마]</strong> 앞선 인기마들의 몸싸움 뒤에서 모래·바람 저항 없이 체력을 아끼다 쏘아 올리는 황금 전개마 (+8점)</td>
                             </tr>
                             <tr>
                                 <td><span class="ai-tag warn-tag">집중 견제 주의 ⚠️</span></td>
@@ -352,7 +371,7 @@
                                 <span class="ai-tag">특급 기수 🏇</span>
                                 <span class="ai-tag">우수 마방 🏆</span>
                                 <span class="ai-tag purple-tag">체급 최강자(탑웨이트) 🏋️</span>
-                                <span class="ai-tag gold-tag">2선 프리런 황금전개 👑</span>
+                                <span class="ai-tag freerun-tag">2선 프리런 황금전개 👑</span>
                                 <span class="ai-tag emerald-tag">입상 공식 부합 ✨</span>
                                 <span class="ai-tag gold-tag">과거 스피드 최상 🏎️</span>
                             </div>
@@ -365,9 +384,50 @@
                 </div>
             </div>
 
-            <!-- [탭 3] 베팅 가이드 (3대 경마장별 필승 공략법 집대성!) -->
+            <!-- [탭 3] 베팅 가이드 (자르지 않은 원본 사진 & 3대 경마장 비법) -->
             <div id="tab-betting" class="tab-content">
                 
+                <div class="guide-card" style="border: 2px solid #e63946;">
+                    <div class="guide-title" style="color:#e63946;">
+                        📸 [10/5 서울 10R 실전 화면] 자르지 않은 원본 그대로 보기
+                    </div>
+                    <div class="guide-text">
+                        사용자님께서 직접 분석하신 <strong>10월 5일 서울 10R 실전 복기 전체 화면</strong>입니다. 인기 1위마의 침몰과 3착 복병마의 우승을 한눈에 대조해 보세요!
+                    </div>
+
+                    <!-- 📸 자르지 않은 원본 사진 뷰어 -->
+                    <div class="full-screenshot-box">
+                        <img src="./case_study_1005.JPG" alt="10/5 서울 10R 실전 복기 원본 화면" class="full-screenshot-img" onerror="this.onerror=null; this.src='./case_study_1005.png';">
+                    </div>
+
+                    <div class="guide-sub">🎯 전략 1. 가장 안전하고 돈 되는 승식: 「복연승식 (와이드)」</div>
+                    <div class="guide-box gold">
+                        <strong>뱃지 조건이 가장 좋은 [9번 혁무상(52.5kg 경량 복병)]을 '축(Anchor)'으로 삼아 분산 베팅!</strong><br>
+                        • 조합: `[9번] ✖ [5번]`, `[9번] ✖ [3번]`, `[9번] ✖ [8번]`<br>
+                        • <strong>결과</strong>: <strong>9번-8번 복연승 대박 적중!</strong> (복연승 배당만 수십 배 회수)
+                    </div>
+
+                    <div class="guide-sub">🎯 전략 2. 수백 배 인생 마권: 「삼복승식 포메이션」</div>
+                    <div class="guide-box purple">
+                        <strong>AI 추천 3착 복병인 9번을 축으로 놓고, 2선 프리런 복병마(8번, 6번)를 받치는 비법!</strong><br>
+                        • 1열(축마): `[9번 혁무상]`<br>
+                        • 2열(상위권): `[5번 용비태양]`, `[3번 레전드와우]`<br>
+                        • 3열(복병 받치기): `[8번 송당황태자]`, `[6번 그레이스루트]` (황금전개 뱃지마)<br>
+                        • <strong>결과</strong>: 9번(1착) - 8번(2착) - 6번(3착)으로 <strong>수백 배 초대박 삼복승 완벽 적중!</strong>
+                    </div>
+
+                    <div class="guide-sub">🎯 전략 3. 소액 로또: 「9번 단승식 / 연승식」</div>
+                    <div class="guide-box">
+                        • 9번 혁무상은 52.5kg으로 너무 가벼운데 배당판에서 비인기마(10배 이상)로 방치되었습니다.<br>
+                        • <strong>커피값 1~2천 원만 단승/연승에 얹어두어도 1착 골인 시 2~3만 원이 즉시 회수</strong>됩니다!
+                    </div>
+
+                    <div class="guide-box warn">
+                        <strong>👑 절대 불패 황금 수칙</strong><br>
+                        AI가 1~2위로 뽑았더라도 <strong>56.5kg 이상 무거운 인기마는 단통으로 가지 말고</strong>, 52kg대 가벼운 등짐에 황금전개 뱃지를 달고 3착 복병으로 뽑힌 <strong>[9번 혁무상] 같은 말을 축마로 삼아라!</strong>
+                    </div>
+                </div>
+
                 <!-- 3대 경마장별 맞춤 필승 공식 -->
                 <div class="guide-card" style="border: 2px solid #1e3c72;">
                     <div class="guide-title" style="color:#1e3c72;">
@@ -383,26 +443,13 @@
                     <div class="guide-sub">🌊 2. [부산경남 경마] 긴 직선(460m) 역전 추입 & 명문마방 공식</div>
                     <div class="guide-box purple">
                         • 부경은 직선주로가 서울보다 60m나 길어서 선행마가 결승선 앞에서 잘 잡힙니다.<br>
-                        • 1400m 이상에서는 <strong>[부경 직선주로 추입 🚀]</strong> 뱃지가 달린 말과 김영관/라이스/백광열 등 <strong>[우수 마방 🏆]</strong> 말을 복승/삼복승 축으로 삼으세요!
+                        • 1400m 이상에서는 <strong>[부경 직선주로 추입 🚀]</strong> 뱃지가 달린 말과 <strong>[우수 마방 🏆]</strong> 말을 복승/삼복승 축으로 삼으세요!
                     </div>
 
                     <div class="guide-sub">🏛️ 3. [서울 경마] 인기마 견제 & 2선 프리런 복병 공식</div>
                     <div class="guide-box warn">
                         • 서울은 기수들 간의 몸싸움이 치열해 56.5kg 이상 무거운 인기 선행마가 자멸하기 쉽습니다.<br>
                         • 앞선 싸움을 피해 3~4번째로 달리는 <strong>[2선 프리런 황금전개 👑]</strong> 복병마를 1착 축마로 과감히 노리세요!
-                    </div>
-                </div>
-
-                <!-- 실전 10/5 서울 10R 복기 가이드 -->
-                <div class="guide-card">
-                    <div class="guide-title" style="color:#e63946;">
-                        👑 [실전 검증] 100배 고배당 쓸어 담는 '역발상 복병 축' 베팅 비법
-                    </div>
-                    <div class="guide-text">
-                        10월 5일 서울 10R에서 <strong>인기 1위마가 9착 침몰</strong>하고, AI가 집어낸 <strong>[3착 복병마 9번]이 1착 우승</strong>, <strong>[8번 복병]이 2착</strong>하여 초대박 배당이 터졌습니다!
-                    </div>
-                    <div class="guide-box gold">
-                        <strong>복연승식(와이드) 황금 공식</strong>: 52kg대 가벼운 등짐에 2선 프리런 뱃지를 단 복병마를 축으로 잡고, 상위권 2두와 외곽 복병을 엮어 분산 베팅하면 수십~수백 배 고배당이 안전하게 회수됩니다!
                     </div>
                 </div>
             </div>
@@ -443,7 +490,7 @@
         </div>
     </div>
 
-    <!-- 스크립트 로직 -->
+    <!-- 스크립트 로직 (경마장별 동적 테마 & 추천 승식 연동) -->
     <script>
         const CORRECT_PIN = "1415";
 
@@ -582,7 +629,6 @@
                             datePrefix = `${m}/${d} `;
                         }
 
-                        // 경마장별 아이콘 부착
                         let meetIcon = "🏛️";
                         if (r.meet_name === "제주") meetIcon = "🍊";
                         else if (r.meet_name === "부산경남" || r.meet_name === "영천") meetIcon = "🌊";
@@ -679,8 +725,10 @@
                 if (h.ai_tags && h.ai_tags.length > 0) {
                     tagsHtml = '<div class="tag-list" style="margin-top:6px;">' + h.ai_tags.map(t => {
                         const isWarn = t.includes('주의') || t.includes('자멸') || t.includes('거품');
-                        const isGold = t.includes('프리런') || t.includes('독주') || t.includes('인코스');
-                        return `<span class="ai-tag ${isWarn ? 'warn-tag' : (isGold ? 'gold-tag' : '')}">${t}</span>`;
+                        const isFreerun = t.includes('프리런');
+                        const isGold = t.includes('독주') || t.includes('인코스');
+                        const tagClass = isFreerun ? 'freerun-tag' : (isWarn ? 'warn-tag' : (isGold ? 'gold-tag' : ''));
+                        return `<span class="ai-tag ${tagClass}">${t}</span>`;
                     }).join('') + '</div>';
                 }
 
@@ -707,22 +755,36 @@
         }
 
         // ========================================================
-        // 🐎 [1번 탭] 전개 포지션 추천 렌더링
+        // 🐎 [1번 탭] 전개 포지션 추천 렌더링 (동적 테마 연동!)
         // ========================================================
         function renderRace(idx) {
             const race = allRaceData[idx];
             const list = document.getElementById('horseList');
             const banner = document.getElementById('pickBanner');
+            const headerEl = document.getElementById('appHeader');
             const bannerTitle = document.getElementById('bannerTitle');
             const hitTag = document.getElementById('hitStatusTag');
             const recBox = document.getElementById('aiRecommendation');
             const top3Box = document.getElementById('aiTop3Recommendation');
+            const stratBox = document.getElementById('aiStrategyBar');
             const patternBox = document.getElementById('aiPatternMatchList');
             const distLabel = document.getElementById('distLabel');
             const targetBar = document.getElementById('specialTargetBar');
             list.innerHTML = '';
 
             distLabel.textContent = `경주 (${race.distance || '1200'}m | ${race.track || '양호'})`;
+
+            // 🎯 [신규] 경마장별 동적 테마 컬러 적용
+            if (race.meet_name === "제주") {
+                headerEl.style.background = "linear-gradient(135deg, #c2410c, #ea580c)";
+                banner.style.background = "linear-gradient(135deg, #ea580c, #f97316)";
+            } else if (race.meet_name === "부산경남" || race.meet_name === "영천") {
+                headerEl.style.background = "linear-gradient(135deg, #0369a1, #0284c7)";
+                banner.style.background = "linear-gradient(135deg, #0284c7, #38bdf8)";
+            } else {
+                headerEl.style.background = "linear-gradient(135deg, #1e3c72, #2a5298)";
+                banner.style.background = "linear-gradient(135deg, #ff6b6b, #ff8e53)";
+            }
 
             if (race.is_trio_target) {
                 targetBar.style.display = 'flex';
@@ -737,13 +799,12 @@
 
             recBox.innerHTML = `🥇 [${h1.gate}번 ${h1.name}] ✖ 🥈 [${h2.gate}번 ${h2.name}]`;
             top3Box.innerHTML = `🎯 <strong>삼복승 조합</strong>: [${h1.gate}번] 축마 ➔ [${h2.gate}번] 선입 ➔ 🥉 <strong>[${h3.gate}번 ${h3.name}] 복병!</strong>`;
+            stratBox.innerHTML = `🎯 <strong>추천 승식</strong>: ${race.bet_recommend || '복승식 단통 & 복연승'}`;
             patternBox.innerHTML = race.scenario_title ? `📊 ${race.scenario_title}<br><span style="font-size:0.75rem; opacity:0.85;">${race.scenario_desc || ''}</span>` : `📊 전개 분석 완료`;
 
             const actual1st = race.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 1);
             const actual2nd = race.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 2);
             const actual3rd = race.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 3);
-
-            banner.className = 'pick-banner';
 
             if (actual1st && actual2nd) {
                 const actualTop3Gates = [actual1st.gate, actual2nd.gate, actual3rd ? actual3rd.gate : null].filter(Boolean);
@@ -751,17 +812,17 @@
                 const matchedInTop3 = aiTop3.filter(g => actualTop3Gates.includes(g)).length;
 
                 if (matchedInTop3 >= 2) {
-                    banner.classList.add('hit-exact');
+                    banner.className = 'pick-banner hit-exact';
                     bannerTitle.textContent = "🎯 복연승/삼복승 전개 적중!";
                     hitTag.textContent = "포지션 적중 🏆";
                     recBox.textContent = `실제 결과: 1착 [${actual1st.gate}번 ${actual1st.name}] - 2착 [${actual2nd.gate}번 ${actual2nd.name}]`;
                 } else if (h1.gate === actual1st.gate) {
-                    banner.classList.add('hit-win');
+                    banner.className = 'pick-banner hit-win';
                     bannerTitle.textContent = "🎯 1착 우승축마 적중!";
                     hitTag.textContent = "1착 적중 🥇";
                     recBox.textContent = `실제 결과: 1착 [${actual1st.gate}번 ${actual1st.name}] - 2착 [${actual2nd.gate}번 ${actual2nd.name}]`;
                 } else {
-                    banner.classList.add('finished-miss');
+                    banner.className = 'pick-banner finished-miss';
                     bannerTitle.textContent = "🏁 경주 종료 (결과 복기)";
                     hitTag.textContent = "경기 완료";
                     recBox.textContent = `실제 결과: 1착 [${actual1st.gate}번 ${actual1st.name}] - 2착 [${actual2nd.gate}번 ${actual2nd.name}]`;
@@ -794,8 +855,10 @@
                 if (h.ai_tags && h.ai_tags.length > 0) {
                     tagsHtml = '<div class="tag-list">' + h.ai_tags.map(t => {
                         const isWarn = t.includes('주의') || t.includes('자멸') || t.includes('거품');
-                        const isGold = t.includes('프리런') || t.includes('독주') || t.includes('인코스');
-                        return `<span class="ai-tag ${isWarn ? 'warn-tag' : (isGold ? 'gold-tag' : '')}">${t}</span>`;
+                        const isFreerun = t.includes('프리런');
+                        const isGold = t.includes('독주') || t.includes('인코스');
+                        const tagClass = isFreerun ? 'freerun-tag' : (isWarn ? 'warn-tag' : (isGold ? 'gold-tag' : ''));
+                        return `<span class="ai-tag ${tagClass}">${t}</span>`;
                     }).join('') + '</div>';
                 }
 
