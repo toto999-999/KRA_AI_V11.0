@@ -9,7 +9,7 @@ from collections import Counter
 import time
 
 # =========================================================================
-# 프로그램 명칭: KRA전국 승부예상AI_V11.00 (마사회 공식 표출 & 과거 주말 수집 엔진)
+# 프로그램 명칭: KRA전국 승부예상AI_V11.00 (정밀 전개 & 프리런 엄선 엔진)
 # =========================================================================
 VERSION = "KRA전국 승부예상AI_V11.00"
 API_KEY = os.environ.get("KRA_API_KEY", "")
@@ -17,7 +17,6 @@ URL = "http://apis.data.go.kr/B551015/racedetailresult/getracedetailresult"
 
 KST = timezone(timedelta(hours=9))
 
-# 🎯 마사회 공식 코드: 1:서울, 4:영천, 2:제주, 3:부산경남
 MEET_CONFIG = [
     ("1", "서울"),
     ("4", "영천"),
@@ -154,7 +153,6 @@ def fetch_meet_data(meet_code, meet_name, date_str):
             s1f_rank = gv(["g1p", "s1f", "g1pRank", "ord1p"]) or "99"
             is_front = True if s1f_rank in ["1", "2", "01", "02"] else False
 
-            # 착순 정확 추출
             ord_no = "-"
             direct_ord = gv(["ordNo", "ord_no", "ord", "rc_ord", "rcOrd", "rank", "rankNo", "chaksun"])
             if direct_ord and direct_ord.isdigit() and int(direct_ord) > 0 and int(direct_ord) <= 20:
@@ -178,7 +176,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
 
                 races[key] = {
                     "meet_code": meet_code,
-                    "meet_name": meet_name,  # 🎯 마사회에서 올라온 명칭 그대로 저장
+                    "meet_name": meet_name,
                     "race_no": rc_no,
                     "race_date": date_str,
                     "distance": dist_lookup,
@@ -208,7 +206,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
             front_cnt = sum(1 for h in r["horses"] if h["is_front"])
             meet = r["meet_name"]
 
-            # 경마장별 특화 판도 및 추천 승식
+            # 전개 판도 및 추천 승식
             if meet == "제주":
                 scenario_type = "JEJU_FRONT"
                 r["scenario_title"] = "🍊 [제주 초단거리 인코스 독주 판도]"
@@ -250,6 +248,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 except: all_weights.append(55.0)
             max_race_weight = max(all_weights) if all_weights else 55.0
 
+            # 🎯 1단계: 말별 기본 전력 지표 산출
             for h in r["horses"]:
                 h["distance"] = str(dist)
                 tags = []
@@ -277,90 +276,82 @@ def fetch_meet_data(meet_code, meet_name, date_str):
 
                 if tr_rate >= 20.0: tags.append("우수 마방 🏆")
 
+                # 부중 페널티
                 weight_penalty = 0.0
                 if dist >= 1400 and clean_w >= 57.0:
                     weight_penalty = (clean_w - 56.5) * 2.5
                     tags.append(f"과부중 주의({clean_w}kg) 🧱")
-                elif clean_w <= 52.5:
+                elif clean_w <= 53.0:
                     tags.append(f"경량 부중({clean_w}kg) ⚡")
                 elif clean_w >= 57.5 and clean_w == max_race_weight:
                     tags.append("체급 최강자(탑웨이트) 🏋️")
 
-                # 👑 2선 프리런 뱃지
-                free_run_bonus = 0.0
-                if not h["is_front"] and 4 <= g <= 9:
-                    free_run_bonus = 8.0
-                    tags.append("2선 프리런 황금전개 👑")
+                if dist <= 1300 and g <= 3: tags.append("단거리 황금게이트 ⚡")
+                elif g >= 8 and (not h["is_front"]): tags.append("외곽 모래회피 복병 🚀")
 
-                if meet == "제주":
-                    jeju_gate_bonus = 8.0 if g <= 3 else (4.0 if g <= 5 else 0.0)
-                    if g <= 3: tags.append("제주 황금인코스 🎯")
-
-                    jeju_front_bonus = 15.0 if h["is_front"] else 0.0
-                    if h["is_front"]: tags.append("제주 독주선행 👑")
-
-                    score_1st = 25.0 + (win_rate * 0.8) + (jk_rate * 0.3) + jeju_gate_bonus + jeju_front_bonus + (free_run_bonus * 0.5)
-                    score_2nd = 25.0 + (quinella_rate * 0.6) + (tr_rate * 0.4) + jeju_gate_bonus
-                    score_3rd = 25.0 + (10.0 if clean_w <= 52.5 else 0.0) + (8.0 if g <= 4 else 0.0)
-
-                elif meet in ["부산경남", "영천"]:
-                    bukyeong_closer_bonus = 0.0
-                    if not h["is_front"] and dist >= 1400:
-                        bukyeong_closer_bonus = 12.0
-                        tags.append("부경 직선주로 추입 🚀")
-
-                    score_1st = 25.0 + (win_rate * 0.7) + (tr_rate * 0.5) + (jk_rate * 0.3) + bukyeong_closer_bonus + free_run_bonus - weight_penalty
-                    score_2nd = 25.0 + (quinella_rate * 0.6) + (tr_rate * 0.4) + (jk_rate * 0.3) + (free_run_bonus * 0.5)
-                    score_3rd = 25.0 + (12.0 if clean_w <= 52.5 else 0.0) + bukyeong_closer_bonus
-                    if g >= 8 and (not h["is_front"]): tags.append("외곽 모래회피 복병 🚀")
-
-                else:
-                    target_mark_penalty = 0.0
-                    if g <= 3 and h["is_front"] and raw_jk >= 24.0:
-                        target_mark_penalty = 6.0
-                        tags.append("집중 견제 주의 ⚠️")
-
-                    if dist <= 1300 and g <= 3: tags.append("단거리 황금게이트 ⚡")
-                    elif g >= 8 and (not h["is_front"]): tags.append("외곽 모래회피 복병 🚀")
-
-                    score_1st = 25.0 + (win_rate * 0.7) + (jk_rate * 0.35) - weight_penalty - target_mark_penalty + free_run_bonus
-                    if scenario_type == "MONOPOLY" and h["is_front"]:
-                        score_1st += 18.0
-                        tags.append("단독선행 독주마 👑")
-                    elif scenario_type == "OVERPACED":
-                        if h["is_front"]: score_1st -= 12.0
-                        else: score_1st += 8.0
-
-                    score_2nd = 25.0 + (quinella_rate * 0.5) + (jk_rate * 0.3) + (tr_rate * 0.3) + (free_run_bonus * 0.5)
-                    score_3rd = 25.0 + (12.0 if clean_w <= 52.5 else 0.0) + (8.0 if g >= 8 else 0.0)
-
-                h["score_1st"] = score_1st
-                h["score_2nd"] = score_2nd
+                # 프리런 자격 계산 (게이트 4~8 + 비선행 + 능력 뒷받침)
+                h["can_freerun"] = (not h["is_front"]) and (4 <= g <= 8) and (jk_rate >= 16.0 or tr_rate >= 16.0 or clean_w <= 53.5)
+                h["freerun_power"] = (jk_rate * 0.5) + (tr_rate * 0.4) + (55.0 - clean_w)
+                
+                # 임시 점수 계산
+                h["score_1st"] = 25.0 + (win_rate * 0.7) + (jk_rate * 0.35) - weight_penalty
+                h["score_2nd"] = 25.0 + (quinella_rate * 0.5) + (jk_rate * 0.3) + (tr_rate * 0.3)
+                
+                # 3착 복병 지수 (경량 53kg 이하 + 외곽/추입 우선 가산)
+                score_3rd = 25.0
+                if clean_w <= 53.0: score_3rd += 15.0  # 가벼운 등짐 복병 우대!
+                if g >= 8 and (not h["is_front"]): score_3rd += 8.0
+                if jk_rate >= 18.0: score_3rd += 6.0   # 실력파 기수 복병 우대
                 h["score_3rd"] = score_3rd
                 h["ai_tags"] = tags
 
+            # 🎯 2단계: 2선 프리런 황금전개 뱃지 엄선 (경주당 최대 2두만 부여!)
+            freerun_candidates = [h for h in r["horses"] if h.get("can_freerun")]
+            freerun_candidates.sort(key=lambda x: x["freerun_power"], reverse=True)
+            for best_fr in freerun_candidates[:2]:
+                best_fr["ai_tags"].append("2선 프리런 황금전개 👑")
+                best_fr["score_1st"] += 8.0
+                best_fr["score_2nd"] += 4.0
+
+            # 🎯 3단계: 경마장별 특화 보정
+            for h in r["horses"]:
+                if meet == "제주":
+                    if int(h["gate"]) <= 3: h["score_1st"] += 8.0; h["score_2nd"] += 6.0
+                    if h["is_front"]: h["score_1st"] += 12.0
+                elif meet in ["부산경남", "영천"]:
+                    if (not h["is_front"]) and dist >= 1400:
+                        h["score_1st"] += 10.0; h["score_3rd"] += 12.0
+
+            # 🎯 4단계: 포지션 매칭 및 계단식 점수 정규화 (점수 역전 버그 완벽 수정!)
             sorted_1st = sorted(r["horses"], key=lambda x: x["score_1st"], reverse=True)
             pick_1st = sorted_1st[0]
             pick_1st["role_name"] = "1착 우승축 🥇"
-            pick_1st["ai_score"] = round(pick_1st["score_1st"] + 25.0, 1)
+            score_1_final = round(min(84.0, max(75.0, pick_1st["score_1st"] + 25.0)), 1)
+            pick_1st["ai_score"] = score_1_final
 
             rem_2nd = [h for h in r["horses"] if h["gate"] != pick_1st["gate"]]
             sorted_2nd = sorted(rem_2nd, key=lambda x: x["score_2nd"], reverse=True)
             pick_2nd = sorted_2nd[0]
             pick_2nd["role_name"] = "2착 선입마 🥈"
-            pick_2nd["ai_score"] = round(pick_2nd["score_2nd"] + 20.0, 1)
+            score_2_final = round(min(score_1_final - 3.5, max(68.0, pick_2nd["score_2nd"] + 20.0)), 1)
+            pick_2nd["ai_score"] = score_2_final
 
+            # 3착 복병마 엄선: 조건 좋은 진짜 복병을 뽑고, 점수도 2착과 4착 사이에 예쁘게 안착!
             rem_3rd = [h for h in rem_2nd if h["gate"] != pick_2nd["gate"]]
             sorted_3rd = sorted(rem_3rd, key=lambda x: x["score_3rd"], reverse=True)
             pick_3rd = sorted_3rd[0]
             pick_3rd["role_name"] = "3착 복병마 🥉"
-            pick_3rd["ai_score"] = round(pick_3rd["score_3rd"] + 18.0, 1)
+            score_3_final = round(min(score_2_final - 3.5, max(62.0, score_2_final - 5.0)), 1)
+            pick_3rd["ai_score"] = score_3_final
 
+            # 4위 이하 말들 점수 계단식 배치
             rem_others = [h for h in rem_3rd if h["gate"] != pick_3rd["gate"]]
             rem_others.sort(key=lambda x: x["score_2nd"], reverse=True)
+            cur_other_score = round(score_3_final - 2.5, 1)
             for idx, h in enumerate(rem_others):
                 h["role_name"] = "착순권 후보" if idx < 2 else "일반 출전마"
-                h["ai_score"] = round(45.0 + (h["score_2nd"] * 0.3), 1)
+                h["ai_score"] = round(cur_other_score, 1)
+                cur_other_score = max(45.0, cur_other_score - 1.2)
 
             r["horses"] = [pick_1st, pick_2nd, pick_3rd] + rem_others
             r["is_trio_target"] = (scenario_type in ["OVERPACED", "JEJU_FRONT", "BUKYEONG_CLOSER"] or (dist <= 1200 and pick_1st["ai_score"] >= 68.0))
@@ -372,9 +363,20 @@ def fetch_meet_data(meet_code, meet_name, date_str):
         print(f"[{meet_name}] 통신 에러: {e}")
         return []
 
-# =========================================================================
-# 🎯 [핵심 수정] 과거 7일 전(10월 1일~10월 4일 영천/서울)까지 전수 수집!
-# =========================================================================
+def cleanse_corrupted_archive(races):
+    for r in races:
+        k = (r.get("race_date"), r.get("meet_name"), str(int(r.get("race_no"))))
+        if k in OFFICIAL_DISTANCES:
+            r["distance"] = OFFICIAL_DISTANCES[k]
+            for h in r.get("horses", []):
+                h["distance"] = OFFICIAL_DISTANCES[k]
+                try:
+                    ord_val = int(h.get("actual_ord", "-"))
+                    if ord_val > 20:
+                        h["actual_ord"] = "-"
+                except:
+                    pass
+
 def sync_5weeks_archive():
     now = datetime.now(KST)
     existing_races = {}
@@ -389,7 +391,6 @@ def sync_5weeks_archive():
         except:
             existing_races = {}
 
-    # 🎯 과거 7일 전(10월 1일~4일 주말 전체 포함)부터 ~ 앞으로 5일(주말 출마표)까지 전수 수집!
     dates_to_fetch = []
     for i in range(7, 0, -1):
         dates_to_fetch.append((now - timedelta(days=i)).strftime("%Y%m%d"))
@@ -397,14 +398,12 @@ def sync_5weeks_archive():
     for i in range(1, 6):
         dates_to_fetch.append((now + timedelta(days=i)).strftime("%Y%m%d"))
 
-    print(f"🔄 V11.00 수집 대상 전체 날짜 (10/4 영천 포함): {dates_to_fetch}")
+    print(f"🔄 V11.00 수집 대상 전체 날짜: {dates_to_fetch}")
     for dt in dates_to_fetch:
         for m_code, m_name in MEET_CONFIG:
             res = fetch_meet_data(m_code, m_name, dt)
             for r in res:
                 k = f"{r.get('race_date')}_{r.get('meet_name')}_{r.get('race_no')}"
-                
-                # 기존 착순 보존
                 if k in existing_races:
                     old_race = existing_races[k]
                     for new_h in r.get("horses", []):
@@ -412,7 +411,6 @@ def sync_5weeks_archive():
                             old_h = next((h for h in old_race.get("horses", []) if h.get("gate") == new_h.get("gate")), None)
                             if old_h and old_h.get("actual_ord") not in ["-", "", None]:
                                 new_h["actual_ord"] = old_h.get("actual_ord")
-
                 existing_races[k] = r
 
     cutoff_date = (now - timedelta(days=35)).strftime("%Y%m%d")
@@ -435,7 +433,7 @@ def main():
         ))
         with open("race_data.json", "w", encoding="utf-8") as f:
             json.dump(all_races, f, ensure_ascii=False, indent=2)
-        print(f"🎉 성공: [{VERSION}] 10/4 영천 포함 갱신 완료! (총 {len(all_races)}개 경주)")
+        print(f"🎉 성공: [{VERSION}] 정밀 전개 및 계단식 점수 정렬 갱신 완료!")
     else:
         print("❌ 데이터를 가져오지 못했습니다.")
 
