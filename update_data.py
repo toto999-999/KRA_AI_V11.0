@@ -9,7 +9,7 @@ from collections import Counter
 import time
 
 # =========================================================================
-# 프로그램 명칭: KRA전국 승부예상AI_V11.00 (공식 거리 전수 매핑 & 사전 뱃지 엔진)
+# 프로그램 명칭: KRA전국 승부예상AI_V11.00 (추입 뱃지 엄선 & 3대 경마장 완성 엔진)
 # =========================================================================
 VERSION = "KRA전국 승부예상AI_V11.00"
 API_KEY = os.environ.get("KRA_API_KEY", "")
@@ -24,7 +24,6 @@ MEET_CONFIG = [
     ("3", "부산경남")
 ]
 
-# 🎯 마사회 공식 출마표 거리 1:1 전수 완벽 매핑 (1200m 도배 원천 퇴치!)
 OFFICIAL_DISTANCES = {
     # 10월 3일 (토)
     ("20261003", "서울", "1"): "1000", ("20261003", "서울", "2"): "1200",
@@ -56,7 +55,7 @@ OFFICIAL_DISTANCES = {
     ("20261005", "제주", "3"): "1000", ("20261005", "제주", "4"): "1110",
     ("20261005", "제주", "5"): "1200", ("20261005", "제주", "6"): "1300", ("20261005", "제주", "7"): "1300",
 
-    # 🎯 10월 9일 (금) 이번 주 금요 경마 공식 편성 거리
+    # 10월 9일 (금) 이번 주 금요 경마 공식 편성 거리
     ("20261009", "부산경남", "1"): "1000", ("20261009", "부산경남", "2"): "1200",
     ("20261009", "부산경남", "3"): "1600", ("20261009", "부산경남", "4"): "1600",
     ("20261009", "부산경남", "5"): "1400", ("20261009", "부산경남", "6"): "1200",
@@ -65,7 +64,7 @@ OFFICIAL_DISTANCES = {
     ("20261009", "제주", "3"): "1000", ("20261009", "제주", "4"): "1000",
     ("20261009", "제주", "5"): "1110", ("20261009", "제주", "6"): "1200", ("20261009", "제주", "7"): "1400",
 
-    # 🎯 10월 10일 (토) 이번 주 토요 경마 공식 편성 거리
+    # 10월 10일 (토) 이번 주 토요 경마 공식 편성 거리
     ("20261010", "서울", "1"): "1000", ("20261010", "서울", "2"): "1200",
     ("20261010", "서울", "3"): "1300", ("20261010", "서울", "4"): "1400",
     ("20261010", "서울", "5"): "1800", ("20261010", "서울", "6"): "1200",
@@ -75,7 +74,7 @@ OFFICIAL_DISTANCES = {
     ("20261010", "제주", "3"): "1000", ("20261010", "제주", "4"): "1110",
     ("20261010", "제주", "5"): "1110", ("20261010", "제주", "6"): "1200", ("20261010", "제주", "7"): "1300",
 
-    # 🎯 10월 11일 (일) 이번 주 일요 경마 공식 편성 거리
+    # 10월 11일 (일) 이번 주 일요 경마 공식 편성 거리
     ("20261011", "서울", "1"): "1000", ("20261011", "서울", "2"): "1200",
     ("20261011", "서울", "3"): "1200", ("20261011", "서울", "4"): "1300",
     ("20261011", "서울", "5"): "1400", ("20261011", "서울", "6"): "1200",
@@ -177,13 +176,12 @@ def fetch_meet_data(meet_code, meet_name, date_str):
             ord1_cnt = gv(["ord1Cnt", "ord1_cnt", "totOrd1Cnt"]) or "0"
             ord2_cnt = gv(["ord2Cnt", "ord2_cnt", "totOrd2Cnt"]) or "0"
 
-            # 🎯 [사전 선행마 판정 개선] 오늘 S1F뿐만 아니라 과거 선행력/직전착순으로 경기 전에도 판정!
             s1f_rank = gv(["g1p", "s1f", "g1pRank", "ord1p"]) or ""
             is_front = False
             if s1f_rank in ["1", "2", "01", "02"]:
                 is_front = True
             elif str(pre_ord).strip() in ["1", "2", "01", "02"] and int(gate) <= 4:
-                is_front = True  # 과거 성적 바탕 사전 선행 판정!
+                is_front = True
 
             ord_no = "-"
             direct_ord = gv(["ordNo", "ord_no", "ord", "rc_ord", "rcOrd", "rank", "rankNo", "chaksun"])
@@ -202,9 +200,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
 
             key = f"{meet_name}_{rc_no}_{date_str}"
             if key not in races:
-                # 🎯 공식 편성표 거리 최우선 매핑!
                 dist_lookup = OFFICIAL_DISTANCES.get((date_str, meet_name, rc_no), "1200")
-
                 races[key] = {
                     "meet_code": meet_code,
                     "meet_name": meet_name,
@@ -232,7 +228,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
             front_cnt = sum(1 for h in r["horses"] if h["is_front"])
             meet = r["meet_name"]
 
-            # 경마장별 특화 판도 및 추천 승식
+            # 전개 판도 및 추천 승식
             if meet == "제주":
                 scenario_type = "JEJU_FRONT"
                 r["scenario_title"] = "🍊 [제주 초단거리 인코스 독주 판도]"
@@ -274,6 +270,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 except: all_weights.append(55.0)
             max_race_weight = max(all_weights) if all_weights else 55.0
 
+            # 🎯 1단계: 기본 전력 지표 산출
             for h in r["horses"]:
                 h["distance"] = str(dist)
                 tags = []
@@ -301,7 +298,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
 
                 if tr_rate >= 20.0: tags.append("우수 마방 🏆")
 
-                # 부중
+                # 부중 페널티
                 weight_penalty = 0.0
                 if dist >= 1400 and clean_w >= 57.0:
                     weight_penalty = (clean_w - 56.5) * 2.5
@@ -314,10 +311,14 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 if dist <= 1300 and g <= 3: tags.append("단거리 황금게이트 ⚡")
                 elif g >= 8 and (not h["is_front"]): tags.append("외곽 모래회피 복병 🚀")
 
-                # 2선 프리런 자격 계산
+                # 👑 2선 프리런 자격 계산 (게이트 4~8 + 비선행 + 능력 뒷받침)
                 h["can_freerun"] = (not h["is_front"]) and (4 <= g <= 8) and (jk_rate >= 16.0 or tr_rate >= 16.0 or clean_w <= 53.5)
                 h["freerun_power"] = (jk_rate * 0.5) + (tr_rate * 0.4) + (55.0 - clean_w)
-                
+
+                # 🚀 부경 추입마 자격 계산 (1400m+ & 비선행 & 가벼운 부중/상위기수)
+                h["can_closer"] = (meet in ["부산경남", "영천"]) and (dist >= 1400) and (not h["is_front"])
+                h["closer_power"] = (55.0 - clean_w) * 1.5 + (jk_rate * 0.4) + (tr_rate * 0.3)
+
                 h["score_1st"] = 25.0 + (win_rate * 0.7) + (jk_rate * 0.35) - weight_penalty
                 h["score_2nd"] = 25.0 + (quinella_rate * 0.5) + (jk_rate * 0.3) + (tr_rate * 0.3)
                 
@@ -329,7 +330,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 h["score_3rd"] = score_3rd
                 h["ai_tags"] = tags
 
-            # 2선 프리런 뱃지 엄선 (경주당 1~2두)
+            # 🎯 2단계: [2선 프리런 황금전개 👑] 뱃지 엄선 (경주당 최대 2두만 부여!)
             freerun_candidates = [h for h in r["horses"] if h.get("can_freerun")]
             freerun_candidates.sort(key=lambda x: x["freerun_power"], reverse=True)
             for best_fr in freerun_candidates[:2]:
@@ -337,9 +338,16 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 best_fr["score_1st"] += 8.0
                 best_fr["score_2nd"] += 4.0
 
-            # 경마장별 특화 보정 & 뱃지 정상 발동
+            # 🎯 3단계: [부경 직선주로 추입 🚀] 뱃지 엄선 (전체 도배 차단! 상위 2두만 부여!)
+            closer_candidates = [h for h in r["horses"] if h.get("can_closer")]
+            closer_candidates.sort(key=lambda x: x["closer_power"], reverse=True)
+            for best_closer in closer_candidates[:2]:
+                best_closer["ai_tags"].append("부경 직선주로 추입 🚀")
+                best_closer["score_1st"] += 10.0
+                best_closer["score_3rd"] += 12.0
+
+            # 🎯 4단계: 제주 전용 뱃지 부여
             for h in r["horses"]:
-                # 🍊 1. 제주 전용 뱃지
                 if meet == "제주":
                     if int(h["gate"]) <= 3:
                         h["score_1st"] += 8.0
@@ -347,21 +355,12 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                     if h["is_front"]:
                         h["score_1st"] += 12.0
                         h["ai_tags"].append("제주 독주선행 👑")
-
-                # 🌊 2. 부경 전용 뱃지
-                elif meet in ["부산경남", "영천"]:
-                    if (not h["is_front"]) and dist >= 1400:
-                        h["score_1st"] += 10.0
-                        h["score_3rd"] += 12.0
-                        h["ai_tags"].append("부경 직선주로 추입 🚀")
-
-                # 🏛️ 3. 서울 전용 뱃지
-                else:
+                elif meet == "서울":
                     if int(h["gate"]) <= 3 and h["is_front"] and JOCKEY_RATES.get(h["jockey"], 12.0) >= 24.0:
                         h["score_1st"] -= 6.0
                         h["ai_tags"].append("집중 견제 주의 ⚠️")
 
-            # 포지션 매칭 및 계단식 점수 정규화
+            # 🎯 5단계: 포지션 매칭 및 계단식 점수 정규화
             sorted_1st = sorted(r["horses"], key=lambda x: x["score_1st"], reverse=True)
             pick_1st = sorted_1st[0]
             pick_1st["role_name"] = "1착 우승축 🥇"
@@ -375,6 +374,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
             score_2_final = round(min(score_1_final - 3.5, max(68.0, pick_2nd["score_2nd"] + 20.0)), 1)
             pick_2nd["ai_score"] = score_2_final
 
+            # 3착 복병마
             rem_3rd = [h for h in rem_2nd if h["gate"] != pick_2nd["gate"]]
             sorted_3rd = sorted(rem_3rd, key=lambda x: x["score_3rd"], reverse=True)
             pick_3rd = sorted_3rd[0]
@@ -471,7 +471,7 @@ def main():
         ))
         with open("race_data.json", "w", encoding="utf-8") as f:
             json.dump(all_races, f, ensure_ascii=False, indent=2)
-        print(f"🎉 성공: [{VERSION}] 공식 거리 전수 매핑 및 사전 뱃지 갱신 완료!")
+        print(f"🎉 성공: [{VERSION}] 추입 뱃지 엄선 및 정규화 갱신 완료!")
     else:
         print("❌ 데이터를 가져오지 못했습니다.")
 
