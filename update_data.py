@@ -9,7 +9,7 @@ from collections import Counter
 import time
 
 # =========================================================================
-# 프로그램 명칭: KRA전국 승부예상AI_V11.00 (3대 경마장 특화 분석 엔진)
+# 프로그램 명칭: KRA전국 승부예상AI_V11.00 (2선 프리런 복원 & 3대 경마장 엔진)
 # =========================================================================
 VERSION = "KRA전국 승부예상AI_V11.00"
 API_KEY = os.environ.get("KRA_API_KEY", "")
@@ -153,7 +153,6 @@ def fetch_meet_data(meet_code, meet_name, date_str):
             s1f_rank = gv(["g1p", "s1f", "g1pRank", "ord1p"]) or "99"
             is_front = True if s1f_rank in ["1", "2", "01", "02"] else False
 
-            # 착순 정확 추출
             ord_no = "-"
             direct_ord = gv(["ordNo", "ord_no", "ord", "rc_ord", "rcOrd", "rank", "rankNo", "chaksun"])
             if direct_ord and direct_ord.isdigit() and int(direct_ord) > 0 and int(direct_ord) <= 20:
@@ -205,43 +204,46 @@ def fetch_meet_data(meet_code, meet_name, date_str):
 
             dist = int(r["distance"])
             front_cnt = sum(1 for h in r["horses"] if h["is_front"])
-
-            # =========================================================================
-            # 🏛️🌊🍊 [V11.00 핵심] 3대 경마장별 전개 판도 차별화 진단
-            # =========================================================================
             meet = r["meet_name"]
 
+            # 🎯 경마장별 특화 전개 판도 & 베팅 승식 지정
             if meet == "제주":
-                # [제주] 코너 급선회 초단거리 ➔ 인코스 선행 독주 판도
                 scenario_type = "JEJU_FRONT"
+                r["meet_tag"] = "JEJU"
                 r["scenario_title"] = "🍊 [제주 초단거리 인코스 독주 판도]"
                 r["scenario_desc"] = "급선회 코너와 초단거리 주로! 1~3번 안쪽 게이트 선행마 와이어투와이어 독주 시나리오"
+                r["bet_recommend"] = "단승식·복승식 올인"
 
             elif meet in ["부산경남", "영천"]:
-                # [부경] 460m 긴 직선주로 ➔ 막판 200m 역전 추입 & 명문마방 승부
+                r["meet_tag"] = "BUKYEONG"
                 if dist >= 1400:
                     scenario_type = "BUKYEONG_CLOSER"
                     r["scenario_title"] = "🌊 [부경 긴 직선(460m) 추입 역전 판도]"
                     r["scenario_desc"] = "서울보다 60m 긴 직선주로! 선행마 무력화 및 막판 200m(G1F) 추입 탄력마 대역전 시나리오"
+                    r["bet_recommend"] = "복연승·삼복승 포메이션"
                 else:
                     scenario_type = "BALANCED"
                     r["scenario_title"] = "🌊 [부경 단거리 명문마방 정석 판도]"
                     r["scenario_desc"] = "상위 마방 전력의 정직한 반영 및 안정적 선입 버티기"
+                    r["bet_recommend"] = "복승식 단통 & 복연승"
 
             else: # 서울
-                # [서울] 직선 400m ➔ 인기마 집중 견제 & 2선 프리런 복병
+                r["meet_tag"] = "SEOUL"
                 if dist >= 1700 and front_cnt >= 3:
                     scenario_type = "OVERPACED"
                     r["scenario_title"] = "🏛️ [서울 선행 자멸 ➔ 2선 프리런 역전 판도]"
                     r["scenario_desc"] = "인기 선행마 집중 견제 자멸! 앞선 싸움 피하는 2선 프리런 복병의 어부지리 승부"
+                    r["bet_recommend"] = "2선 프리런 복연승·삼복승"
                 elif front_cnt <= 1:
                     scenario_type = "MONOPOLY"
                     r["scenario_title"] = "🏛️ [서울 단독 선행 독주 판도]"
                     r["scenario_desc"] = "선행마 단독 출전으로 편안한 페이스 유도, 와이어투와이어 독주 시나리오"
+                    r["bet_recommend"] = "단승식 축마 & 복승식"
                 else:
                     scenario_type = "BALANCED"
                     r["scenario_title"] = "🏛️ [서울 전개 밸런스 정밀 판도]"
                     r["scenario_desc"] = "선행 2두의 정상 페이스 속 2선 프리런 탄력 대결"
+                    r["bet_recommend"] = "복승식 단통 & 삼복승"
 
             all_weights = []
             for h in r["horses"]:
@@ -249,9 +251,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 except: all_weights.append(55.0)
             max_race_weight = max(all_weights) if all_weights else 55.0
 
-            # =========================================================================
-            # 🎯 3대 경마장별 특화 채점 알고리즘 (서울/부경/제주 분기)
-            # =========================================================================
+            # 🎯 채점 및 2선 프리런 뱃지 완벽 복원
             for h in r["horses"]:
                 h["distance"] = str(dist)
                 tags = []
@@ -289,9 +289,16 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 elif clean_w >= 57.5 and clean_w == max_race_weight:
                     tags.append("체급 최강자(탑웨이트) 🏋️")
 
-                # -------------------------------------------------------------
-                # 🍊 1. 제주 전용 채점: 인코스 선행 절대 몰빵
-                # -------------------------------------------------------------
+                # =========================================================
+                # 👑 [핵심 복원] 2선 프리런 황금전개 뱃지 (전 경마장 완벽 적용!)
+                # 앞선 무리한 선두싸움 피하고 3~4번째로 달리는 황금 전개마
+                # =========================================================
+                free_run_bonus = 0.0
+                if not h["is_front"] and 4 <= g <= 9:
+                    free_run_bonus = 8.0
+                    tags.append("2선 프리런 황금전개 👑")
+
+                # 🍊 1. 제주 전용 채점
                 if meet == "제주":
                     jeju_gate_bonus = 8.0 if g <= 3 else (4.0 if g <= 5 else 0.0)
                     if g <= 3: tags.append("제주 황금인코스 🎯")
@@ -299,38 +306,28 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                     jeju_front_bonus = 15.0 if h["is_front"] else 0.0
                     if h["is_front"]: tags.append("제주 독주선행 👑")
 
-                    score_1st = 25.0 + (win_rate * 0.8) + (jk_rate * 0.3) + jeju_gate_bonus + jeju_front_bonus
+                    score_1st = 25.0 + (win_rate * 0.8) + (jk_rate * 0.3) + jeju_gate_bonus + jeju_front_bonus + (free_run_bonus * 0.5)
                     score_2nd = 25.0 + (quinella_rate * 0.6) + (tr_rate * 0.4) + jeju_gate_bonus
                     score_3rd = 25.0 + (10.0 if clean_w <= 52.5 else 0.0) + (8.0 if g <= 4 else 0.0)
 
-                # -------------------------------------------------------------
-                # 🌊 2. 부경/영천 전용 채점: 긴 직선주로(460m) 추입 & 마방 신뢰
-                # -------------------------------------------------------------
+                # 🌊 2. 부경/영천 전용 채점
                 elif meet in ["부산경남", "영천"]:
                     bukyeong_closer_bonus = 0.0
                     if not h["is_front"] and dist >= 1400:
                         bukyeong_closer_bonus = 12.0
                         tags.append("부경 직선주로 추입 🚀")
 
-                    # 부경은 마방 전력 격차가 뚜렷함 (조교사 점수 강화)
-                    score_1st = 25.0 + (win_rate * 0.7) + (tr_rate * 0.5) + (jk_rate * 0.3) + bukyeong_closer_bonus - weight_penalty
-                    score_2nd = 25.0 + (quinella_rate * 0.6) + (tr_rate * 0.4) + (jk_rate * 0.3)
+                    score_1st = 25.0 + (win_rate * 0.7) + (tr_rate * 0.5) + (jk_rate * 0.3) + bukyeong_closer_bonus + free_run_bonus - weight_penalty
+                    score_2nd = 25.0 + (quinella_rate * 0.6) + (tr_rate * 0.4) + (jk_rate * 0.3) + (free_run_bonus * 0.5)
                     score_3rd = 25.0 + (12.0 if clean_w <= 52.5 else 0.0) + bukyeong_closer_bonus
                     if g >= 8 and (not h["is_front"]): tags.append("외곽 모래회피 복병 🚀")
 
-                # -------------------------------------------------------------
-                # 🏛️ 3. 서울 전용 채점: 집중 견제 페널티 & 2선 프리런 발굴
-                # -------------------------------------------------------------
+                # 🏛️ 3. 서울 전용 채점
                 else:
                     target_mark_penalty = 0.0
                     if g <= 3 and h["is_front"] and raw_jk >= 24.0:
                         target_mark_penalty = 6.0
                         tags.append("집중 견제 주의 ⚠️")
-
-                    free_run_bonus = 0.0
-                    if not h["is_front"] and 4 <= g <= 9:
-                        free_run_bonus = 8.0
-                        tags.append("2선 프리런 황금전개 👑")
 
                     if dist <= 1300 and g <= 3: tags.append("단거리 황금게이트 ⚡")
                     elif g >= 8 and (not h["is_front"]): tags.append("외곽 모래회피 복병 🚀")
@@ -343,7 +340,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                         if h["is_front"]: score_1st -= 12.0
                         else: score_1st += 8.0
 
-                    score_2nd = 25.0 + (quinella_rate * 0.5) + (jk_rate * 0.3) + (tr_rate * 0.3)
+                    score_2nd = 25.0 + (quinella_rate * 0.5) + (jk_rate * 0.3) + (tr_rate * 0.3) + (free_run_bonus * 0.5)
                     score_3rd = 25.0 + (12.0 if clean_w <= 52.5 else 0.0) + (8.0 if g >= 8 else 0.0)
 
                 h["score_1st"] = score_1st
@@ -413,7 +410,6 @@ def sync_5weeks_archive():
         except:
             existing_races = {}
 
-    # 과거 3일 복기 ~ 앞으로 5일(주말 출마표 전수 포섭)
     dates_to_fetch = []
     for i in range(3, 0, -1):
         dates_to_fetch.append((now - timedelta(days=i)).strftime("%Y%m%d"))
@@ -427,8 +423,6 @@ def sync_5weeks_archive():
             res = fetch_meet_data(m_code, m_name, dt)
             for r in res:
                 k = f"{r.get('race_date')}_{r.get('meet_name')}_{r.get('race_no')}"
-                
-                # 기존 착순 보존
                 if k in existing_races:
                     old_race = existing_races[k]
                     for new_h in r.get("horses", []):
@@ -460,7 +454,7 @@ def main():
         ))
         with open("race_data.json", "w", encoding="utf-8") as f:
             json.dump(all_races, f, ensure_ascii=False, indent=2)
-        print(f"🎉 성공: [{VERSION}] 3대 경마장 특화 분석 완료! (총 {len(all_races)}개 경주)")
+        print(f"🎉 성공: [{VERSION}] 2선 프리런 복원 및 3대 경마장 갱신 완료!")
     else:
         print("❌ 데이터를 가져오지 못했습니다.")
 
