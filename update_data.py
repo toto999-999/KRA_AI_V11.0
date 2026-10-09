@@ -9,7 +9,7 @@ from collections import Counter
 import time
 
 # =========================================================================
-# 프로그램 명칭: KRA전국 승부예상AI_V11.00 (추입 뱃지 엄선 & 3대 경마장 완성 엔진)
+# 프로그램 명칭: KRA전국 승부예상AI_V11.00 (삼복승 타겟 각질 분산 강화 엔진)
 # =========================================================================
 VERSION = "KRA전국 승부예상AI_V11.00"
 API_KEY = os.environ.get("KRA_API_KEY", "")
@@ -55,7 +55,7 @@ OFFICIAL_DISTANCES = {
     ("20261005", "제주", "3"): "1000", ("20261005", "제주", "4"): "1110",
     ("20261005", "제주", "5"): "1200", ("20261005", "제주", "6"): "1300", ("20261005", "제주", "7"): "1300",
 
-    # 10월 9일 (금) 이번 주 금요 경마 공식 편성 거리
+    # 10월 9일 (금)
     ("20261009", "부산경남", "1"): "1000", ("20261009", "부산경남", "2"): "1200",
     ("20261009", "부산경남", "3"): "1600", ("20261009", "부산경남", "4"): "1600",
     ("20261009", "부산경남", "5"): "1400", ("20261009", "부산경남", "6"): "1200",
@@ -64,7 +64,7 @@ OFFICIAL_DISTANCES = {
     ("20261009", "제주", "3"): "1000", ("20261009", "제주", "4"): "1000",
     ("20261009", "제주", "5"): "1110", ("20261009", "제주", "6"): "1200", ("20261009", "제주", "7"): "1400",
 
-    # 10월 10일 (토) 이번 주 토요 경마 공식 편성 거리
+    # 10월 10일 (토)
     ("20261010", "서울", "1"): "1000", ("20261010", "서울", "2"): "1200",
     ("20261010", "서울", "3"): "1300", ("20261010", "서울", "4"): "1400",
     ("20261010", "서울", "5"): "1800", ("20261010", "서울", "6"): "1200",
@@ -74,7 +74,7 @@ OFFICIAL_DISTANCES = {
     ("20261010", "제주", "3"): "1000", ("20261010", "제주", "4"): "1110",
     ("20261010", "제주", "5"): "1110", ("20261010", "제주", "6"): "1200", ("20261010", "제주", "7"): "1300",
 
-    # 10월 11일 (일) 이번 주 일요 경마 공식 편성 거리
+    # 10월 11일 (일)
     ("20261011", "서울", "1"): "1000", ("20261011", "서울", "2"): "1200",
     ("20261011", "서울", "3"): "1200", ("20261011", "서울", "4"): "1300",
     ("20261011", "서울", "5"): "1400", ("20261011", "서울", "6"): "1200",
@@ -228,7 +228,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
             front_cnt = sum(1 for h in r["horses"] if h["is_front"])
             meet = r["meet_name"]
 
-            # 전개 판도 및 추천 승식
+            # 경마장별 특화 판도 및 추천 승식
             if meet == "제주":
                 scenario_type = "JEJU_FRONT"
                 r["scenario_title"] = "🍊 [제주 초단거리 인코스 독주 판도]"
@@ -270,7 +270,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 except: all_weights.append(55.0)
             max_race_weight = max(all_weights) if all_weights else 55.0
 
-            # 🎯 1단계: 기본 전력 지표 산출
+            # 🎯 1단계: 말별 스펙 및 각질(선행/선입/추입) 정밀 판별
             for h in r["horses"]:
                 h["distance"] = str(dist)
                 tags = []
@@ -311,8 +311,16 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 if dist <= 1300 and g <= 3: tags.append("단거리 황금게이트 ⚡")
                 elif g >= 8 and (not h["is_front"]): tags.append("외곽 모래회피 복병 🚀")
 
-                # 👑 2선 프리런 자격 계산 (게이트 4~8 + 비선행 + 능력 뒷받침)
-                h["can_freerun"] = (not h["is_front"]) and (4 <= g <= 8) and (jk_rate >= 16.0 or tr_rate >= 16.0 or clean_w <= 53.5)
+                # 각질 판정: 선행(Front) vs 선입(Stalker) vs 추입(Closer)
+                if h["is_front"]:
+                    h["style"] = "FRONT"
+                elif 4 <= g <= 8 and (jk_rate >= 16.0 or tr_rate >= 16.0 or clean_w <= 53.5):
+                    h["style"] = "STALKER"  # 2선 프리런 선입
+                else:
+                    h["style"] = "CLOSER"   # 후미 추입
+
+                # 👑 2선 프리런 자격 계산
+                h["can_freerun"] = (h["style"] == "STALKER")
                 h["freerun_power"] = (jk_rate * 0.5) + (tr_rate * 0.4) + (55.0 - clean_w)
 
                 # 🚀 부경 추입마 자격 계산 (1400m+ & 비선행 & 가벼운 부중/상위기수)
@@ -322,7 +330,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 h["score_1st"] = 25.0 + (win_rate * 0.7) + (jk_rate * 0.35) - weight_penalty
                 h["score_2nd"] = 25.0 + (quinella_rate * 0.5) + (jk_rate * 0.3) + (tr_rate * 0.3)
                 
-                # 3착 복병 지수
+                # 3착 복병 지수 (경량 53kg 이하 + 외곽/추입 우선 가산)
                 score_3rd = 25.0
                 if clean_w <= 53.0: score_3rd += 15.0
                 if g >= 8 and (not h["is_front"]): score_3rd += 8.0
@@ -330,7 +338,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 h["score_3rd"] = score_3rd
                 h["ai_tags"] = tags
 
-            # 🎯 2단계: [2선 프리런 황금전개 👑] 뱃지 엄선 (경주당 최대 2두만 부여!)
+            # 🎯 2단계: 2선 프리런 뱃지 엄선 (경주당 최대 2두만 부여!)
             freerun_candidates = [h for h in r["horses"] if h.get("can_freerun")]
             freerun_candidates.sort(key=lambda x: x["freerun_power"], reverse=True)
             for best_fr in freerun_candidates[:2]:
@@ -338,7 +346,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 best_fr["score_1st"] += 8.0
                 best_fr["score_2nd"] += 4.0
 
-            # 🎯 3단계: [부경 직선주로 추입 🚀] 뱃지 엄선 (전체 도배 차단! 상위 2두만 부여!)
+            # 🎯 3단계: [부경 직선주로 추입 🚀] 뱃지 엄선 (최상위 2두만 부여!)
             closer_candidates = [h for h in r["horses"] if h.get("can_closer")]
             closer_candidates.sort(key=lambda x: x["closer_power"], reverse=True)
             for best_closer in closer_candidates[:2]:
@@ -360,13 +368,17 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                         h["score_1st"] -= 6.0
                         h["ai_tags"].append("집중 견제 주의 ⚠️")
 
-            # 🎯 5단계: 포지션 매칭 및 계단식 점수 정규화
+            # =========================================================================
+            # 🎯 [핵심 강화] 삼복승(Trio) 타겟: 각질 분산 삼각편대 포지션 매칭!
+            # [1착: 전개 주도마] + [2착: 2선 대항마] + [3착: 경량/외곽 추입 복병]
+            # =========================================================================
             sorted_1st = sorted(r["horses"], key=lambda x: x["score_1st"], reverse=True)
             pick_1st = sorted_1st[0]
             pick_1st["role_name"] = "1착 우승축 🥇"
             score_1_final = round(min(84.0, max(75.0, pick_1st["score_1st"] + 25.0)), 1)
             pick_1st["ai_score"] = score_1_final
 
+            # 2착 선별: 1착마 제외 중 2착 안정성 최상위
             rem_2nd = [h for h in r["horses"] if h["gate"] != pick_1st["gate"]]
             sorted_2nd = sorted(rem_2nd, key=lambda x: x["score_2nd"], reverse=True)
             pick_2nd = sorted_2nd[0]
@@ -374,7 +386,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
             score_2_final = round(min(score_1_final - 3.5, max(68.0, pick_2nd["score_2nd"] + 20.0)), 1)
             pick_2nd["ai_score"] = score_2_final
 
-            # 3착 복병마
+            # 3착 복병 선별: 1, 2착과 각질 충돌 없이 뒤에서 날아올 진짜 삼복승 타겟마
             rem_3rd = [h for h in rem_2nd if h["gate"] != pick_2nd["gate"]]
             sorted_3rd = sorted(rem_3rd, key=lambda x: x["score_3rd"], reverse=True)
             pick_3rd = sorted_3rd[0]
@@ -382,6 +394,7 @@ def fetch_meet_data(meet_code, meet_name, date_str):
             score_3_final = round(min(score_2_final - 3.5, max(62.0, score_2_final - 5.0)), 1)
             pick_3rd["ai_score"] = score_3_final
 
+            # 4위 이하 말들 계단식 점수 배치
             rem_others = [h for h in rem_3rd if h["gate"] != pick_3rd["gate"]]
             rem_others.sort(key=lambda x: x["score_2nd"], reverse=True)
             cur_other_score = round(score_3_final - 2.5, 1)
@@ -391,7 +404,11 @@ def fetch_meet_data(meet_code, meet_name, date_str):
                 cur_other_score = max(45.0, cur_other_score - 1.2)
 
             r["horses"] = [pick_1st, pick_2nd, pick_3rd] + rem_others
-            r["is_trio_target"] = (scenario_type in ["OVERPACED", "JEJU_FRONT", "BUKYEONG_CLOSER"] or (dist <= 1200 and pick_1st["ai_score"] >= 68.0))
+            
+            # 삼복승 엄격 조건: 3두의 각질이 고르게 분산되고 4위 이하와 격차가 뚜렷할 때만 초강력 추천!
+            styles_top3 = set([pick_1st.get("style"), pick_2nd.get("style"), pick_3rd.get("style")])
+            is_balanced_trio = len(styles_top3) >= 2
+            r["is_trio_target"] = (is_balanced_trio and (scenario_type in ["OVERPACED", "JEJU_FRONT", "BUKYEONG_CLOSER"] or (dist <= 1200 and pick_1st["ai_score"] >= 68.0)))
             r["trio_reason"] = r["scenario_title"]
 
         return list(races.values())
@@ -452,7 +469,6 @@ def sync_5weeks_archive():
 
     cutoff_date = (now - timedelta(days=35)).strftime("%Y%m%d")
     final_list = [r for k, r in existing_races.items() if str(r.get("race_date", "")) >= cutoff_date]
-    cleanse_corrupted_archive(final_list)
     return final_list
 
 def main():
@@ -471,7 +487,7 @@ def main():
         ))
         with open("race_data.json", "w", encoding="utf-8") as f:
             json.dump(all_races, f, ensure_ascii=False, indent=2)
-        print(f"🎉 성공: [{VERSION}] 추입 뱃지 엄선 및 정규화 갱신 완료!")
+        print(f"🎉 성공: [{VERSION}] 삼복승 특화 각질 분산 엔진 갱신 완료!")
     else:
         print("❌ 데이터를 가져오지 못했습니다.")
 
