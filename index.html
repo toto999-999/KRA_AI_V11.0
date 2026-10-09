@@ -145,6 +145,51 @@
             border-radius: 8px; border: 1px solid #ddd;
         }
 
+        /* ======================================================== */
+        /* 📊 [신규] 4번 탭 전용 서브 탭 & 요약 리스트 스타일 */
+        /* ======================================================== */
+        .sub-tab-nav {
+            display: flex; gap: 8px; margin-bottom: 14px;
+        }
+        .sub-tab-btn {
+            flex: 1; padding: 10px 4px; border: none; border-radius: 8px;
+            background: #e2e8f0; font-size: 0.82rem; font-weight: 800; color: #475569;
+            cursor: pointer; transition: all 0.2s ease; text-align: center;
+        }
+        .sub-tab-btn.active {
+            background: #1e3c72; color: #fff; box-shadow: 0 2px 6px rgba(30, 60, 114, 0.3);
+        }
+
+        .summary-day-card {
+            background: white; border-radius: 12px; padding: 14px; margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04); border-top: 4px solid #1e3c72;
+        }
+        .summary-day-title {
+            font-size: 0.95rem; font-weight: 800; color: #1e3c72; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;
+        }
+        .summary-race-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 4px; border-bottom: 1px dashed #e2e8f0; font-size: 0.85rem;
+        }
+        .summary-race-row:last-child { border-bottom: none; }
+        .summary-round-label {
+            font-weight: 800; color: #334155; min-width: 80px;
+        }
+        .gate-flow-box {
+            display: flex; align-items: center; gap: 6px;
+        }
+        .ball-gate {
+            width: 28px; height: 28px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 0.85rem;
+            font-weight: 900; color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .ball-1st { background: #eab308; } /* 1착 골드 */
+        .ball-2nd { background: #94a3b8; } /* 2착 실버 */
+        .ball-3rd { background: #d97706; } /* 3착 브론즈 */
+        .flow-arrow { color: #cbd5e1; font-weight: bold; font-size: 0.75rem; }
+
         .filter-row { display: flex; gap: 6px; margin-bottom: 14px; }
         .filter-btn { flex: 1; padding: 8px 0; background: white; border: 1px solid #ddd; border-radius: 8px; font-size: 0.78rem; font-weight: bold; color: #666; cursor: pointer; text-align: center; }
         .filter-btn.active { background: #1e3c72; color: white; border-color: #1e3c72; }
@@ -221,6 +266,7 @@
         </nav>
 
         <div class="container">
+            <!-- [탭 1] 실시간 승부예측 -->
             <div id="tab-pred" class="tab-content active">
                 <div id="specialTargetBar" class="special-target-bar">
                     <span>🔥 AI 엄격선별: 삼복승·복연승 초강력 추천 경주!</span>
@@ -246,7 +292,7 @@
                 <div id="horseList"></div>
             </div>
 
-            <!-- 탭 2: 20종 뱃지도감 -->
+            <!-- [탭 2] 뱃지 도감 -->
             <div id="tab-badges" class="tab-content">
                 <div class="guide-card">
                     <div class="guide-title">🏷️ AI 핵심 뱃지 총람 (V11.00 3대 경마장 특화 모델)</div>
@@ -380,7 +426,7 @@
                 </div>
             </div>
 
-            <!-- 탭 3: 베팅 가이드 -->
+            <!-- [탭 3] 베팅 가이드 -->
             <div id="tab-betting" class="tab-content">
                 <div class="guide-card" style="border: 2px solid #e63946;">
                     <div class="guide-title" style="color:#e63946;">
@@ -447,7 +493,9 @@
                 </div>
             </div>
 
-            <!-- 탭 4: 입상마 분석실 -->
+            <!-- ======================================================== -->
+            <!-- 📊 [탭 4] 입상마 분석실 (신규 서브 탭 2종 완비!) -->
+            <!-- ======================================================== -->
             <div id="tab-winners" class="tab-content">
                 <div class="guide-card">
                     <div class="guide-title">📊 최근 5주간 실제 1·2·3착 입상마 빅데이터 통계</div>
@@ -471,19 +519,36 @@
                     </div>
                 </div>
 
-                <div class="filter-row">
-                    <button class="filter-btn active" onclick="filterWinners('all', this)">전체 (1~3착)</button>
-                    <button class="filter-btn" onclick="filterWinners('1', this)">1착 우승마 🥇</button>
-                    <button class="filter-btn" onclick="filterWinners('2', this)">2착 준우승 🥈</button>
-                    <button class="filter-btn" onclick="filterWinners('3', this)">3착 입상 🥉</button>
+                <!-- 🎯 [신규] 서브 탭 네비게이션 버튼 바 -->
+                <div class="sub-tab-nav">
+                    <button id="btnSubSummary" class="sub-tab-btn active" onclick="switchWinnerSubTab('sub-summary')">
+                        📋 경주별 게이트 순서 (1-2-3착 요약)
+                    </button>
+                    <button id="btnSubDetail" class="sub-tab-btn" onclick="switchWinnerSubTab('sub-detail')">
+                        🏆 개별 입상마 상세 분석
+                    </button>
                 </div>
 
-                <div id="winnerListContainer"></div>
+                <!-- 서브 탭 1: 경주별 게이트 순서 요약 (요청하신 신규 기능!) -->
+                <div id="subtab-summary" style="display:block;">
+                    <div id="raceSummaryContainer"></div>
+                </div>
+
+                <!-- 서브 탭 2: 개별 입상마 상세 목록 (기존 기능 100% 보존) -->
+                <div id="subtab-detail" style="display:none;">
+                    <div class="filter-row">
+                        <button class="filter-btn active" onclick="filterWinners('all', this)">전체 (1~3착)</button>
+                        <button class="filter-btn" onclick="filterWinners('1', this)">1착 우승마 🥇</button>
+                        <button class="filter-btn" onclick="filterWinners('2', this)">2착 준우승 🥈</button>
+                        <button class="filter-btn" onclick="filterWinners('3', this)">3착 입상 🥉</button>
+                    </div>
+                    <div id="winnerListContainer"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 스크립트 로직 (마사회 공식 표출 그대로 연동) -->
+    <!-- 스크립트 로직 (서브 탭 & 게이트 순서 자동 렌더링 엔진) -->
     <script>
         const CORRECT_PIN = "1415";
 
@@ -533,6 +598,20 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // 🎯 [신규] 입상마분석실 내부 서브 탭 전환 함수
+        function switchWinnerSubTab(targetSubTab) {
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (targetSubTab === 'sub-summary') {
+                document.getElementById('btnSubSummary').classList.add('active');
+                document.getElementById('subtab-summary').style.display = 'block';
+                document.getElementById('subtab-detail').style.display = 'none';
+            } else {
+                document.getElementById('btnSubDetail').classList.add('active');
+                document.getElementById('subtab-summary').style.display = 'none';
+                document.getElementById('subtab-detail').style.display = 'block';
+            }
+        }
+
         const GITHUB_OWNER = "toto999-999";
         const pathParts = window.location.pathname.split('/').filter(Boolean);
         const GITHUB_REPO = pathParts[0] || "KRA-AI-V11.00";
@@ -559,7 +638,7 @@
         function executeWorkflow(token) {
             const toast = document.getElementById('updateToast');
             toast.style.display = 'block';
-            toast.innerHTML = "🚀 V11.00 데이터 갱신 중입니다!<br><span style='font-size:0.75rem; color:#ffeaa7;'>(마사회 서버 통신 중)</span>";
+            toast.innerHTML = "🚀 V11.00 3대 경마장 데이터 갱신 중입니다!<br><span style='font-size:0.75rem; color:#ffeaa7;'>(마사회 서버 통신 중)</span>";
 
             fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/update.yml/dispatches`, {
                 method: 'POST',
@@ -622,7 +701,6 @@
                             datePrefix = `${m}/${d} `;
                         }
 
-                        // 🎯 [핵심] 마사회에서 올라온 명칭 그대로 표출 (영천이면 영천, 서울이면 서울!)
                         const targetBadge = r.is_trio_target ? "🔥[삼복·복연] " : "";
                         opt.textContent = `${targetBadge}[${datePrefix}${r.meet_name}] ${r.race_no}R${dStr}${tStr}`;
                         if (r.is_trio_target) {
@@ -634,7 +712,7 @@
 
                     const latestIdx = data.length > 0 ? (data.length - 1) : 0;
                     select.value = latestIdx;
-                    document.getElementById('dateInfo').textContent = `${data[latestIdx].race_date} AI V11.00 표준 엔진`;
+                    document.getElementById('dateInfo').textContent = `${data[latestIdx].race_date} AI V11.00 3대 경마장 특화 엔진`;
                     
                     buildWinnersAnalytics();
                     renderRace(latestIdx);
@@ -642,6 +720,96 @@
                 .catch(() => {
                     document.getElementById('dateInfo').textContent = "데이터 로딩 실패";
                 });
+        }
+
+        // ========================================================
+        // 📊 [신규 핵심] 경주별 1·2·3착 게이트 순서 요약 렌더링
+        // ========================================================
+        function buildRaceSummaryView() {
+            const container = document.getElementById('raceSummaryContainer');
+            container.innerHTML = '';
+
+            // 1. 경기 결과(1착, 2착이 있는) 경주들만 모아서 날짜/지역별 그룹화
+            const finishedRaces = allRaceData.filter(r => {
+                const h1 = r.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 1);
+                const h2 = r.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 2);
+                return (h1 && h2);
+            });
+
+            if (finishedRaces.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:#888;">아직 종료된 경주 결과 데이터가 없습니다.</div>';
+                return;
+            }
+
+            // 날짜 최신순 역순 정렬
+            const groupedMap = new Map();
+            finishedRaces.forEach(r => {
+                const groupKey = `${r.race_date}_${r.meet_name}`;
+                if (!groupedMap.has(groupKey)) {
+                    groupedMap.set(groupKey, {
+                        race_date: r.race_date,
+                        meet_name: r.meet_name,
+                        races: []
+                    });
+                }
+                groupedMap.get(groupKey).races.push(r);
+            });
+
+            // 그룹별로 카드 생성
+            groupedMap.forEach(group => {
+                let dateFormatted = "";
+                if (group.race_date && group.race_date.length >= 8) {
+                    const m = parseInt(group.race_date.substring(4, 6), 10);
+                    const d = parseInt(group.race_date.substring(6, 8), 10);
+                    dateFormatted = `${m}/${d}`;
+                }
+
+                let meetIcon = "🏛️";
+                if (group.meet_name === "제주") meetIcon = "🍊";
+                else if (group.meet_name === "부산경남" || group.meet_name === "영천") meetIcon = "🌊";
+
+                // 라운드 번호순 오름차순 정렬
+                group.races.sort((a, b) => parseInt(a.race_no, 10) - parseInt(b.race_no, 10));
+
+                let rowsHtml = '';
+                group.races.forEach(r => {
+                    const h1 = r.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 1);
+                    const h2 = r.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 2);
+                    const h3 = r.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 3);
+
+                    const g1 = h1 ? h1.gate : "-";
+                    const g2 = h2 ? h2.gate : "-";
+                    const g3 = h3 ? h3.gate : "-";
+
+                    rowsHtml += `
+                        <div class="summary-race-row">
+                            <div class="summary-round-label">
+                                <strong>${r.race_no}R</strong> <span style="font-size:0.75rem; color:#64748b;">(${r.distance}m)</span>
+                            </div>
+                            <div class="gate-flow-box">
+                                <span class="ball-gate ball-1st" title="1착: ${h1 ? h1.name : ''}">${g1}</span>
+                                <span class="flow-arrow">-</span>
+                                <span class="ball-gate ball-2nd" title="2착: ${h2 ? h2.name : ''}">${g2}</span>
+                                <span class="flow-arrow">-</span>
+                                <span class="ball-gate ball-3rd" title="3착: ${h3 ? h3.name : ''}">${g3}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML += `
+                    <div class="summary-day-card">
+                        <div class="summary-day-title">
+                            <span>📅 ${dateFormatted} [${meetIcon} ${group.meet_name}]</span>
+                            <span style="font-size:0.75rem; color:#64748b; font-weight:normal;">총 ${group.races.length}개 경주</span>
+                        </div>
+                        <div style="font-size:0.72rem; color:#94a3b8; margin-bottom:6px; display:flex; justify-content:flex-end; gap:8px;">
+                            <span>🥇1착</span> <span>🥈2착</span> <span>🥉3착</span>
+                        </div>
+                        ${rowsHtml}
+                    </div>
+                `;
+            });
         }
 
         function buildWinnersAnalytics() {
@@ -686,6 +854,9 @@
                 document.getElementById('statOutsideRate').textContent = ((outsideCount / totalWinners) * 100).toFixed(0) + ' %';
                 document.getElementById('statTopBadge').textContent = '2선 프리런 황금전개 👑';
             }
+
+            // 🎯 경주별 요약 뷰 빌드
+            buildRaceSummaryView();
             renderWinnersTab('all');
         }
 
@@ -764,7 +935,6 @@
 
             distLabel.textContent = `경주 (${race.distance || '1200'}m | ${race.track || '양호'})`;
 
-            // 마사회 표출별 테마 색상 자동 매핑
             if (race.meet_name === "제주") {
                 headerEl.style.background = "linear-gradient(135deg, #c2410c, #ea580c)";
                 banner.style.background = "linear-gradient(135deg, #ea580c, #f97316)";
