@@ -962,6 +962,9 @@
             stratBox.innerHTML = `🎯 <strong>추천 승식</strong>: ${race.bet_recommend || '복승식 단통 & 복연승'}`;
             patternBox.innerHTML = race.scenario_title ? `📊 ${race.scenario_title}<br><span style="font-size:0.75rem; opacity:0.85;">${race.scenario_desc || ''}</span>` : `📊 전개 분석 완료`;
 
+            // ========================================================
+            // 🎯 [정밀 판정] 실제 결과 3착까지 표출 & 삼복승 100% 전용 포지션 적중!
+            // ========================================================
             const actual1st = race.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 1);
             const actual2nd = race.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 2);
             const actual3rd = race.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 3);
@@ -971,25 +974,35 @@
                 const aiTop3 = [h1.gate, h2.gate, h3.gate];
                 const matchedInTop3 = aiTop3.filter(g => actualTop3Gates.includes(g)).length;
 
-                if (matchedInTop3 >= 2) {
+                const result3rdStr = actual3rd ? ` - 3착 [${actual3rd.gate}번 ${actual3rd.name}]` : "";
+                const fullResultText = `실제 결과: 1착 [${actual1st.gate}번 ${actual1st.name}] - 2착 [${actual2nd.gate}번 ${actual2nd.name}]${result3rdStr}`;
+
+                // 🎯 사용자 요구사항: "포지션 적중은 삼복승 적중일 때만 적중 표시!"
+                if (matchedInTop3 === 3) {
                     banner.className = 'pick-banner hit-exact';
-                    bannerTitle.textContent = "🎯 복연승/삼복승 전개 적중!";
+                    bannerTitle.textContent = "🎯 삼복승 전개 완벽 적중 대성공!";
                     hitTag.textContent = "포지션 적중 🏆";
-                    recBox.textContent = `실제 결과: 1착 [${actual1st.gate}번 ${actual1st.name}] - 2착 [${actual2nd.gate}번 ${actual2nd.name}]`;
+                    recBox.textContent = fullResultText;
+                } else if (matchedInTop3 === 2) {
+                    banner.className = 'pick-banner hit-win';
+                    bannerTitle.textContent = "🎯 복승·복연승 2두 적중 (삼복승 1두 아쉬움)";
+                    hitTag.textContent = "복연승 적중 🥈";
+                    recBox.textContent = fullResultText;
                 } else if (h1.gate === actual1st.gate) {
                     banner.className = 'pick-banner hit-win';
                     bannerTitle.textContent = "🎯 1착 우승축마 적중!";
                     hitTag.textContent = "1착 적중 🥇";
-                    recBox.textContent = `실제 결과: 1착 [${actual1st.gate}번 ${actual1st.name}] - 2착 [${actual2nd.gate}번 ${actual2nd.name}]`;
+                    recBox.textContent = fullResultText;
                 } else {
                     banner.className = 'pick-banner finished-miss';
                     bannerTitle.textContent = "🏁 경주 종료 (결과 복기)";
                     hitTag.textContent = "경기 완료";
-                    recBox.textContent = `실제 결과: 1착 [${actual1st.gate}번 ${actual1st.name}] - 2착 [${actual2nd.gate}번 ${actual2nd.name}]`;
+                    recBox.textContent = fullResultText;
                 }
             } else {
                 bannerTitle.textContent = "🏆 AI 전개 포지션 추천 (1착축 ✖ 2착선입 ✖ 3착복병)";
                 hitTag.textContent = "경기 전 예상";
+            }
             }
 
             race.horses.forEach((h, i) => {
