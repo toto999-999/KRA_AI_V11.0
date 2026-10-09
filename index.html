@@ -145,12 +145,7 @@
             border-radius: 8px; border: 1px solid #ddd;
         }
 
-        /* ======================================================== */
-        /* 📊 [신규] 4번 탭 전용 서브 탭 & 요약 리스트 스타일 */
-        /* ======================================================== */
-        .sub-tab-nav {
-            display: flex; gap: 8px; margin-bottom: 14px;
-        }
+        .sub-tab-nav { display: flex; gap: 8px; margin-bottom: 14px; }
         .sub-tab-btn {
             flex: 1; padding: 10px 4px; border: none; border-radius: 8px;
             background: #e2e8f0; font-size: 0.82rem; font-weight: 800; color: #475569;
@@ -174,20 +169,16 @@
             padding: 8px 4px; border-bottom: 1px dashed #e2e8f0; font-size: 0.85rem;
         }
         .summary-race-row:last-child { border-bottom: none; }
-        .summary-round-label {
-            font-weight: 800; color: #334155; min-width: 80px;
-        }
-        .gate-flow-box {
-            display: flex; align-items: center; gap: 6px;
-        }
+        .summary-round-label { font-weight: 800; color: #334155; min-width: 80px; }
+        .gate-flow-box { display: flex; align-items: center; gap: 6px; }
         .ball-gate {
             width: 28px; height: 28px; border-radius: 50%; display: flex;
             align-items: center; justify-content: center; font-size: 0.85rem;
             font-weight: 900; color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
-        .ball-1st { background: #eab308; } /* 1착 골드 */
-        .ball-2nd { background: #94a3b8; } /* 2착 실버 */
-        .ball-3rd { background: #d97706; } /* 3착 브론즈 */
+        .ball-1st { background: #eab308; }
+        .ball-2nd { background: #94a3b8; }
+        .ball-3rd { background: #d97706; }
         .flow-arrow { color: #cbd5e1; font-weight: bold; font-size: 0.75rem; }
 
         .filter-row { display: flex; gap: 6px; margin-bottom: 14px; }
@@ -223,7 +214,7 @@
         <div class="lock-box">
             <div class="lock-icon">🔐</div>
             <div class="lock-title">KRA전국 승부예상AI_V11.00</div>
-            <div class="lock-desc">비밀번호(PIN 4자리)를 입력하세요.</div>
+            <div class="lock-desc">비밀번호(4자리)를 입력하세요.</div>
             <input type="password" id="pinInput" class="pin-input" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="••••">
             <button class="pin-btn" onclick="checkPin()">잠금 해제</button>
             <div id="pinErr" class="pin-err">비밀번호가 올바르지 않습니다!</div>
@@ -292,7 +283,7 @@
                 <div id="horseList"></div>
             </div>
 
-            <!-- [탭 2] 뱃지 도감 -->
+            <!-- [탭 2] 뱃지 도감 (20종 완전체) -->
             <div id="tab-badges" class="tab-content">
                 <div class="guide-card">
                     <div class="guide-title">🏷️ AI 핵심 뱃지 총람 (V11.00 3대 경마장 특화 모델)</div>
@@ -493,9 +484,7 @@
                 </div>
             </div>
 
-            <!-- ======================================================== -->
-            <!-- 📊 [탭 4] 입상마 분석실 (신규 서브 탭 2종 완비!) -->
-            <!-- ======================================================== -->
+            <!-- [탭 4] 입상마 분석실 -->
             <div id="tab-winners" class="tab-content">
                 <div class="guide-card">
                     <div class="guide-title">📊 최근 5주간 실제 1·2·3착 입상마 빅데이터 통계</div>
@@ -519,7 +508,6 @@
                     </div>
                 </div>
 
-                <!-- 🎯 [신규] 서브 탭 네비게이션 버튼 바 -->
                 <div class="sub-tab-nav">
                     <button id="btnSubSummary" class="sub-tab-btn active" onclick="switchWinnerSubTab('sub-summary')">
                         📋 경주별 게이트 순서 (1-2-3착 요약)
@@ -529,12 +517,10 @@
                     </button>
                 </div>
 
-                <!-- 서브 탭 1: 경주별 게이트 순서 요약 (요청하신 신규 기능!) -->
                 <div id="subtab-summary" style="display:block;">
                     <div id="raceSummaryContainer"></div>
                 </div>
 
-                <!-- 서브 탭 2: 개별 입상마 상세 목록 (기존 기능 100% 보존) -->
                 <div id="subtab-detail" style="display:none;">
                     <div class="filter-row">
                         <button class="filter-btn active" onclick="filterWinners('all', this)">전체 (1~3착)</button>
@@ -548,23 +534,23 @@
         </div>
     </div>
 
-    <!-- 스크립트 로직 (서브 탭 & 게이트 순서 자동 렌더링 엔진) -->
+    <!-- 스크립트 로직 (1415 & 4938 비밀번호 2종 모두 즉시 지원!) -->
     <script>
-        const CORRECT_PIN = "1415";
-
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('app_authenticated') === 'true') {
                 unlockApp();
             } else {
-                document.getElementById('pinInput').focus();
+                const el = document.getElementById('pinInput');
+                if (el) el.focus();
             }
         });
 
+        // 🎯 1415 또는 4938 둘 중 아무거나 입력해도 즉시 잠금 해제!
         function checkPin() {
             const input = document.getElementById('pinInput').value.trim();
             const errEl = document.getElementById('pinErr');
 
-            if (input === CORRECT_PIN) {
+            if (input === "1415" || input === "4938") {
                 localStorage.setItem('app_authenticated', 'true');
                 unlockApp();
             } else {
@@ -598,7 +584,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // 🎯 [신규] 입상마분석실 내부 서브 탭 전환 함수
         function switchWinnerSubTab(targetSubTab) {
             document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
             if (targetSubTab === 'sub-summary') {
@@ -638,7 +623,7 @@
         function executeWorkflow(token) {
             const toast = document.getElementById('updateToast');
             toast.style.display = 'block';
-            toast.innerHTML = "🚀 V11.00 3대 경마장 데이터 갱신 중입니다!<br><span style='font-size:0.75rem; color:#ffeaa7;'>(마사회 서버 통신 중)</span>";
+            toast.innerHTML = "🚀 V11.00 데이터 갱신 중입니다!<br><span style='font-size:0.75rem; color:#ffeaa7;'>(마사회 서버 통신 중)</span>";
 
             fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/update.yml/dispatches`, {
                 method: 'POST',
@@ -712,7 +697,7 @@
 
                     const latestIdx = data.length > 0 ? (data.length - 1) : 0;
                     select.value = latestIdx;
-                    document.getElementById('dateInfo').textContent = `${data[latestIdx].race_date} AI V11.00 3대 경마장 특화 엔진`;
+                    document.getElementById('dateInfo').textContent = `${data[latestIdx].race_date} AI V11.00 표준 엔진`;
                     
                     buildWinnersAnalytics();
                     renderRace(latestIdx);
@@ -722,14 +707,10 @@
                 });
         }
 
-        // ========================================================
-        // 📊 [신규 핵심] 경주별 1·2·3착 게이트 순서 요약 렌더링
-        // ========================================================
         function buildRaceSummaryView() {
             const container = document.getElementById('raceSummaryContainer');
             container.innerHTML = '';
 
-            // 1. 경기 결과(1착, 2착이 있는) 경주들만 모아서 날짜/지역별 그룹화
             const finishedRaces = allRaceData.filter(r => {
                 const h1 = r.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 1);
                 const h2 = r.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 2);
@@ -741,7 +722,6 @@
                 return;
             }
 
-            // 날짜 최신순 역순 정렬
             const groupedMap = new Map();
             finishedRaces.forEach(r => {
                 const groupKey = `${r.race_date}_${r.meet_name}`;
@@ -755,7 +735,6 @@
                 groupedMap.get(groupKey).races.push(r);
             });
 
-            // 그룹별로 카드 생성
             groupedMap.forEach(group => {
                 let dateFormatted = "";
                 if (group.race_date && group.race_date.length >= 8) {
@@ -768,7 +747,6 @@
                 if (group.meet_name === "제주") meetIcon = "🍊";
                 else if (group.meet_name === "부산경남" || group.meet_name === "영천") meetIcon = "🌊";
 
-                // 라운드 번호순 오름차순 정렬
                 group.races.sort((a, b) => parseInt(a.race_no, 10) - parseInt(b.race_no, 10));
 
                 let rowsHtml = '';
@@ -855,7 +833,6 @@
                 document.getElementById('statTopBadge').textContent = '2선 프리런 황금전개 👑';
             }
 
-            // 🎯 경주별 요약 뷰 빌드
             buildRaceSummaryView();
             renderWinnersTab('all');
         }
@@ -916,7 +893,7 @@
         }
 
         // ========================================================
-        // 🐎 [1번 탭] 전개 포지션 추천 렌더링
+        // 🐎 [1번 탭] 전개 포지션 추천 렌더링 (3착 표출 & 삼복승 전용 포지션 적중!)
         // ========================================================
         function renderRace(idx) {
             const race = allRaceData[idx];
@@ -962,9 +939,7 @@
             stratBox.innerHTML = `🎯 <strong>추천 승식</strong>: ${race.bet_recommend || '복승식 단통 & 복연승'}`;
             patternBox.innerHTML = race.scenario_title ? `📊 ${race.scenario_title}<br><span style="font-size:0.75rem; opacity:0.85;">${race.scenario_desc || ''}</span>` : `📊 전개 분석 완료`;
 
-            // ========================================================
-            // 🎯 [정밀 판정] 실제 결과 3착까지 표출 & 삼복승 100% 전용 포지션 적중!
-            // ========================================================
+            // 🎯 실제 결과 3착까지 완벽 표출 & 삼복승(3마리 전원 적중)일 때만 포지션 적중!
             const actual1st = race.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 1);
             const actual2nd = race.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 2);
             const actual3rd = race.horses.find(h => parseInt(String(h.actual_ord).trim(), 10) === 3);
@@ -974,35 +949,33 @@
                 const aiTop3 = [h1.gate, h2.gate, h3.gate];
                 const matchedInTop3 = aiTop3.filter(g => actualTop3Gates.includes(g)).length;
 
-                const result3rdStr = actual3rd ? ` - 3착 [${actual3rd.gate}번 ${actual3rd.name}]` : "";
-                const fullResultText = `실제 결과: 1착 [${actual1st.gate}번 ${actual1st.name}] - 2착 [${actual2nd.gate}번 ${actual2nd.name}]${result3rdStr}`;
+                const res3rd = actual3rd ? ` - 3착 [${actual3rd.gate}번 ${actual3rd.name}]` : "";
+                const fullResultStr = `실제 결과: 1착 [${actual1st.gate}번 ${actual1st.name}] - 2착 [${actual2nd.gate}번 ${actual2nd.name}]${res3rd}`;
 
-                // 🎯 사용자 요구사항: "포지션 적중은 삼복승 적중일 때만 적중 표시!"
                 if (matchedInTop3 === 3) {
                     banner.className = 'pick-banner hit-exact';
                     bannerTitle.textContent = "🎯 삼복승 전개 완벽 적중 대성공!";
                     hitTag.textContent = "포지션 적중 🏆";
-                    recBox.textContent = fullResultText;
+                    recBox.textContent = fullResultStr;
                 } else if (matchedInTop3 === 2) {
                     banner.className = 'pick-banner hit-win';
                     bannerTitle.textContent = "🎯 복승·복연승 2두 적중 (삼복승 1두 아쉬움)";
                     hitTag.textContent = "복연승 적중 🥈";
-                    recBox.textContent = fullResultText;
+                    recBox.textContent = fullResultStr;
                 } else if (h1.gate === actual1st.gate) {
                     banner.className = 'pick-banner hit-win';
                     bannerTitle.textContent = "🎯 1착 우승축마 적중!";
                     hitTag.textContent = "1착 적중 🥇";
-                    recBox.textContent = fullResultText;
+                    recBox.textContent = fullResultStr;
                 } else {
                     banner.className = 'pick-banner finished-miss';
                     bannerTitle.textContent = "🏁 경주 종료 (결과 복기)";
                     hitTag.textContent = "경기 완료";
-                    recBox.textContent = fullResultText;
+                    recBox.textContent = fullResultStr;
                 }
             } else {
                 bannerTitle.textContent = "🏆 AI 전개 포지션 추천 (1착축 ✖ 2착선입 ✖ 3착복병)";
                 hitTag.textContent = "경기 전 예상";
-            }
             }
 
             race.horses.forEach((h, i) => {
