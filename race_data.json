@@ -29571,6 +29571,40 @@
         "ai_score": 66.5
       },
       {
+        "gate": "2",
+        "name": "포에버케이",
+        "jockey": "정도윤",
+        "trainer": "송문길",
+        "weight": "55",
+        "track": "양호",
+        "rc_time": "-",
+        "past_time": "",
+        "g1f_time": "",
+        "win_odds": "0",
+        "pre_ord": "",
+        "rc_cnt": "0",
+        "ord1_cnt": "0",
+        "ord2_cnt": "0",
+        "is_front": false,
+        "actual_ord": "-",
+        "distance": "1200",
+        "style": "CLOSER",
+        "can_freerun": false,
+        "freerun_power": 19.85,
+        "can_closer": false,
+        "closer_power": 15.45,
+        "score_1st": 39.875,
+        "score_2nd": 48.2,
+        "score_3rd": 31.0,
+        "ai_tags": [
+          "상위 기수",
+          "우수 마방 🏆",
+          "단거리 황금게이트 ⚡"
+        ],
+        "role_name": "착순권 후보",
+        "ai_score": 64.0
+      },
+      {
         "gate": "9",
         "name": "싱싱모닝",
         "jockey": "유승완",
@@ -29602,7 +29636,7 @@
           "외곽 모래회피 복병 🚀"
         ],
         "role_name": "착순권 후보",
-        "ai_score": 64.0
+        "ai_score": 62.8
       },
       {
         "gate": "10",
@@ -29633,39 +29667,6 @@
         "ai_tags": [
           "우수 마방 🏆",
           "외곽 모래회피 복병 🚀"
-        ],
-        "role_name": "착순권 후보",
-        "ai_score": 62.8
-      },
-      {
-        "gate": "2",
-        "name": "포에버케이",
-        "jockey": "이동하",
-        "trainer": "송문길",
-        "weight": "55",
-        "track": "양호",
-        "rc_time": "-",
-        "past_time": "",
-        "g1f_time": "",
-        "win_odds": "0",
-        "pre_ord": "",
-        "rc_cnt": "0",
-        "ord1_cnt": "0",
-        "ord2_cnt": "0",
-        "is_front": false,
-        "actual_ord": "-",
-        "distance": "1200",
-        "style": "CLOSER",
-        "can_freerun": false,
-        "freerun_power": 16.6,
-        "can_closer": false,
-        "closer_power": 12.850000000000001,
-        "score_1st": 37.6,
-        "score_2nd": 46.25,
-        "score_3rd": 25.0,
-        "ai_tags": [
-          "우수 마방 🏆",
-          "단거리 황금게이트 ⚡"
         ],
         "role_name": "일반 출전마",
         "ai_score": 61.6
