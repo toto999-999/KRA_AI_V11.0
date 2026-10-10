@@ -31788,6 +31788,38 @@
         "ai_score": 62.0
       },
       {
+        "gate": "3",
+        "name": "마이던",
+        "jockey": "장추열",
+        "trainer": "정호익",
+        "weight": "*52.5",
+        "track": "양호",
+        "rc_time": "-",
+        "past_time": "",
+        "g1f_time": "",
+        "win_odds": "0",
+        "pre_ord": "",
+        "rc_cnt": "0",
+        "ord1_cnt": "0",
+        "ord2_cnt": "0",
+        "is_front": false,
+        "actual_ord": "-",
+        "distance": "1800",
+        "style": "CLOSER",
+        "can_freerun": false,
+        "freerun_power": 19.3,
+        "can_closer": false,
+        "closer_power": 16.799999999999997,
+        "score_1st": 38.3,
+        "score_2nd": 46.25,
+        "score_3rd": 46.0,
+        "ai_tags": [
+          "경량 부중(52.5kg) ⚡"
+        ],
+        "role_name": "착순권 후보",
+        "ai_score": 60.8
+      },
+      {
         "gate": "2",
         "name": "아쿠아라인",
         "jockey": "마이아",
@@ -31815,38 +31847,6 @@
         "score_3rd": 31.0,
         "ai_tags": [
           "상위 기수"
-        ],
-        "role_name": "착순권 후보",
-        "ai_score": 60.8
-      },
-      {
-        "gate": "3",
-        "name": "마이던",
-        "jockey": "이동하",
-        "trainer": "정호익",
-        "weight": "*52.5",
-        "track": "양호",
-        "rc_time": "-",
-        "past_time": "",
-        "g1f_time": "",
-        "win_odds": "0",
-        "pre_ord": "",
-        "rc_cnt": "0",
-        "ord1_cnt": "0",
-        "ord2_cnt": "0",
-        "is_front": false,
-        "actual_ord": "-",
-        "distance": "1800",
-        "style": "CLOSER",
-        "can_freerun": false,
-        "freerun_power": 18.3,
-        "can_closer": false,
-        "closer_power": 16.0,
-        "score_1st": 37.6,
-        "score_2nd": 45.65,
-        "score_3rd": 40.0,
-        "ai_tags": [
-          "경량 부중(52.5kg) ⚡"
         ],
         "role_name": "일반 출전마",
         "ai_score": 59.6
@@ -39389,7 +39389,7 @@
       {
         "gate": "3",
         "name": "오버레인보우",
-        "jockey": "신형철",
+        "jockey": "윤형석",
         "trainer": "조용배",
         "weight": "54",
         "track": "양호",
@@ -39601,6 +39601,39 @@
         "ai_score": 63.0
       },
       {
+        "gate": "11",
+        "name": "서부이글",
+        "jockey": "김동영",
+        "trainer": "조용배",
+        "weight": "*52.5",
+        "track": "양호",
+        "rc_time": "-",
+        "past_time": "",
+        "g1f_time": "",
+        "win_odds": "0",
+        "pre_ord": "",
+        "rc_cnt": "0",
+        "ord1_cnt": "0",
+        "ord2_cnt": "0",
+        "is_front": false,
+        "actual_ord": "-",
+        "distance": "1200",
+        "style": "CLOSER",
+        "can_freerun": false,
+        "freerun_power": 17.0,
+        "can_closer": false,
+        "closer_power": 15.07,
+        "score_1st": 38.23,
+        "score_2nd": 44.540000000000006,
+        "score_3rd": 48.0,
+        "ai_tags": [
+          "경량 부중(52.5kg) ⚡",
+          "외곽 모래회피 복병 🚀"
+        ],
+        "role_name": "착순권 후보",
+        "ai_score": 61.8
+      },
+      {
         "gate": "1",
         "name": "원더풀팀",
         "jockey": "전진구",
@@ -39630,8 +39663,8 @@
           "경량 부중(52.5kg) ⚡",
           "단거리 황금게이트 ⚡"
         ],
-        "role_name": "착순권 후보",
-        "ai_score": 61.8
+        "role_name": "일반 출전마",
+        "ai_score": 60.6
       },
       {
         "gate": "2",
@@ -39664,7 +39697,7 @@
           "단거리 황금게이트 ⚡"
         ],
         "role_name": "일반 출전마",
-        "ai_score": 60.6
+        "ai_score": 59.4
       },
       {
         "gate": "3",
@@ -39696,7 +39729,7 @@
           "단거리 황금게이트 ⚡"
         ],
         "role_name": "일반 출전마",
-        "ai_score": 59.4
+        "ai_score": 58.2
       },
       {
         "gate": "4",
@@ -39726,7 +39759,7 @@
         "score_3rd": 25.0,
         "ai_tags": [],
         "role_name": "일반 출전마",
-        "ai_score": 58.2
+        "ai_score": 57.0
       },
       {
         "gate": "5",
@@ -39758,7 +39791,7 @@
           "경량 부중(53.0kg) ⚡"
         ],
         "role_name": "일반 출전마",
-        "ai_score": 57.0
+        "ai_score": 55.8
       },
       {
         "gate": "6",
@@ -39788,39 +39821,6 @@
         "score_3rd": 40.0,
         "ai_tags": [
           "경량 부중(52.5kg) ⚡"
-        ],
-        "role_name": "일반 출전마",
-        "ai_score": 55.8
-      },
-      {
-        "gate": "11",
-        "name": "서부이글",
-        "jockey": "신형철",
-        "trainer": "조용배",
-        "weight": "*52.5",
-        "track": "양호",
-        "rc_time": "-",
-        "past_time": "",
-        "g1f_time": "",
-        "win_odds": "0",
-        "pre_ord": "",
-        "rc_cnt": "0",
-        "ord1_cnt": "0",
-        "ord2_cnt": "0",
-        "is_front": false,
-        "actual_ord": "-",
-        "distance": "1200",
-        "style": "CLOSER",
-        "can_freerun": false,
-        "freerun_power": 14.100000000000001,
-        "can_closer": false,
-        "closer_power": 12.75,
-        "score_1st": 36.2,
-        "score_2nd": 42.800000000000004,
-        "score_3rd": 48.0,
-        "ai_tags": [
-          "경량 부중(52.5kg) ⚡",
-          "외곽 모래회피 복병 🚀"
         ],
         "role_name": "일반 출전마",
         "ai_score": 54.6
@@ -40213,10 +40213,10 @@
     "version": "KRA전국 승부예상AI_V11.00",
     "horses": [
       {
-        "gate": "7",
-        "name": "파격의반석",
-        "jockey": "송경윤",
-        "trainer": "이정표",
+        "gate": "5",
+        "name": "새내힐",
+        "jockey": "김동영",
+        "trainer": "조용배",
         "weight": "*52.5",
         "track": "양호",
         "rc_time": "-",
@@ -40232,11 +40232,11 @@
         "distance": "1200",
         "style": "STALKER",
         "can_freerun": true,
-        "freerun_power": 15.7,
+        "freerun_power": 17.0,
         "can_closer": false,
-        "closer_power": 14.030000000000001,
-        "score_1st": 45.32,
-        "score_2nd": 47.760000000000005,
+        "closer_power": 15.07,
+        "score_1st": 46.23,
+        "score_2nd": 48.540000000000006,
         "score_3rd": 40.0,
         "ai_tags": [
           "경량 부중(52.5kg) ⚡",
@@ -40377,6 +40377,38 @@
         "ai_score": 60.2
       },
       {
+        "gate": "7",
+        "name": "파격의반석",
+        "jockey": "송경윤",
+        "trainer": "이정표",
+        "weight": "*52.5",
+        "track": "양호",
+        "rc_time": "-",
+        "past_time": "",
+        "g1f_time": "",
+        "win_odds": "0",
+        "pre_ord": "",
+        "rc_cnt": "0",
+        "ord1_cnt": "0",
+        "ord2_cnt": "0",
+        "is_front": false,
+        "actual_ord": "-",
+        "distance": "1200",
+        "style": "STALKER",
+        "can_freerun": true,
+        "freerun_power": 15.7,
+        "can_closer": false,
+        "closer_power": 14.030000000000001,
+        "score_1st": 37.32,
+        "score_2nd": 43.760000000000005,
+        "score_3rd": 40.0,
+        "ai_tags": [
+          "경량 부중(52.5kg) ⚡"
+        ],
+        "role_name": "일반 출전마",
+        "ai_score": 59.0
+      },
+      {
         "gate": "10",
         "name": "하늘평정",
         "jockey": "전진구",
@@ -40407,7 +40439,7 @@
           "외곽 모래회피 복병 🚀"
         ],
         "role_name": "일반 출전마",
-        "ai_score": 59.0
+        "ai_score": 57.8
       },
       {
         "gate": "1",
@@ -40440,7 +40472,7 @@
           "단거리 황금게이트 ⚡"
         ],
         "role_name": "일반 출전마",
-        "ai_score": 57.8
+        "ai_score": 56.6
       },
       {
         "gate": "3",
@@ -40473,7 +40505,7 @@
           "단거리 황금게이트 ⚡"
         ],
         "role_name": "일반 출전마",
-        "ai_score": 56.6
+        "ai_score": 55.4
       },
       {
         "gate": "4",
@@ -40502,38 +40534,6 @@
         "score_2nd": 42.800000000000004,
         "score_3rd": 25.0,
         "ai_tags": [],
-        "role_name": "일반 출전마",
-        "ai_score": 55.4
-      },
-      {
-        "gate": "5",
-        "name": "새내힐",
-        "jockey": "신형철",
-        "trainer": "조용배",
-        "weight": "*52.5",
-        "track": "양호",
-        "rc_time": "-",
-        "past_time": "",
-        "g1f_time": "",
-        "win_odds": "0",
-        "pre_ord": "",
-        "rc_cnt": "0",
-        "ord1_cnt": "0",
-        "ord2_cnt": "0",
-        "is_front": false,
-        "actual_ord": "-",
-        "distance": "1200",
-        "style": "STALKER",
-        "can_freerun": true,
-        "freerun_power": 14.100000000000001,
-        "can_closer": false,
-        "closer_power": 12.75,
-        "score_1st": 36.2,
-        "score_2nd": 42.800000000000004,
-        "score_3rd": 40.0,
-        "ai_tags": [
-          "경량 부중(52.5kg) ⚡"
-        ],
         "role_name": "일반 출전마",
         "ai_score": 54.2
       }
@@ -40622,7 +40622,7 @@
       {
         "gate": "9",
         "name": "투투플라잉",
-        "jockey": "신형철",
+        "jockey": "채상현",
         "trainer": "조용배",
         "weight": "*52.5",
         "track": "양호",
@@ -41029,6 +41029,38 @@
         "ai_score": 66.5
       },
       {
+        "gate": "7",
+        "name": "스타파크",
+        "jockey": "김동영",
+        "trainer": "조용배",
+        "weight": "*52.5",
+        "track": "양호",
+        "rc_time": "-",
+        "past_time": "",
+        "g1f_time": "",
+        "win_odds": "0",
+        "pre_ord": "",
+        "rc_cnt": "0",
+        "ord1_cnt": "0",
+        "ord2_cnt": "0",
+        "is_front": false,
+        "actual_ord": "-",
+        "distance": "1200",
+        "style": "STALKER",
+        "can_freerun": true,
+        "freerun_power": 17.0,
+        "can_closer": false,
+        "closer_power": 15.07,
+        "score_1st": 38.23,
+        "score_2nd": 44.540000000000006,
+        "score_3rd": 40.0,
+        "ai_tags": [
+          "경량 부중(52.5kg) ⚡"
+        ],
+        "role_name": "착순권 후보",
+        "ai_score": 64.0
+      },
+      {
         "gate": "4",
         "name": "원더풀비더",
         "jockey": "전진구",
@@ -41056,7 +41088,7 @@
         "score_3rd": 25.0,
         "ai_tags": [],
         "role_name": "착순권 후보",
-        "ai_score": 64.0
+        "ai_score": 62.8
       },
       {
         "gate": "1",
@@ -41087,8 +41119,8 @@
         "ai_tags": [
           "단거리 황금게이트 ⚡"
         ],
-        "role_name": "착순권 후보",
-        "ai_score": 62.8
+        "role_name": "일반 출전마",
+        "ai_score": 61.6
       },
       {
         "gate": "3",
@@ -41121,7 +41153,7 @@
           "단거리 황금게이트 ⚡"
         ],
         "role_name": "일반 출전마",
-        "ai_score": 61.6
+        "ai_score": 60.4
       },
       {
         "gate": "6",
@@ -41151,38 +41183,6 @@
         "score_3rd": 40.0,
         "ai_tags": [
           "경량 부중(51.0kg) ⚡"
-        ],
-        "role_name": "일반 출전마",
-        "ai_score": 60.4
-      },
-      {
-        "gate": "7",
-        "name": "스타파크",
-        "jockey": "신형철",
-        "trainer": "조용배",
-        "weight": "*52.5",
-        "track": "양호",
-        "rc_time": "-",
-        "past_time": "",
-        "g1f_time": "",
-        "win_odds": "0",
-        "pre_ord": "",
-        "rc_cnt": "0",
-        "ord1_cnt": "0",
-        "ord2_cnt": "0",
-        "is_front": false,
-        "actual_ord": "-",
-        "distance": "1200",
-        "style": "STALKER",
-        "can_freerun": true,
-        "freerun_power": 14.100000000000001,
-        "can_closer": false,
-        "closer_power": 12.75,
-        "score_1st": 36.2,
-        "score_2nd": 42.800000000000004,
-        "score_3rd": 40.0,
-        "ai_tags": [
-          "경량 부중(52.5kg) ⚡"
         ],
         "role_name": "일반 출전마",
         "ai_score": 59.2
